@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
+
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorMiddleware");
 
@@ -15,25 +16,36 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
+/* ---------------- SOCKET.IO SETUP ---------------- */
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL,
-    credentials: true
-  }
+    origin: [
+      "http://localhost:5173",
+      process.env.CLIENT_URL,
+    ],
+    credentials: true,
+  },
 });
 
 app.set("io", io);
 
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  credentials: true
-}));
+/* ---------------- MIDDLEWARE ---------------- */
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      process.env.CLIENT_URL,
+    ],
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
 app.use(morgan("dev"));
 
+/* ---------------- ROUTES ---------------- */
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/tables", require("./routes/tableRoutes"));
 app.use("/api/orders", require("./routes/orderRoutes"));
@@ -41,22 +53,26 @@ app.use("/api/analytics", require("./routes/analyticsRoutes"));
 app.use("/api/layout", require("./routes/layoutRoutes"));
 app.use("/api/menu", require("./routes/menuRoutes"));
 
+/* ---------------- ROOT TEST ROUTE ---------------- */
+app.get("/", (req, res) => {
+  res.send("🚀 Cafe POS Backend Running");
+});
+
+/* ---------------- ERROR HANDLER ---------------- */
 app.use(errorHandler);
 
+/* ---------------- SOCKET EVENTS ---------------- */
 io.on("connection", (socket) => {
   console.log("🔌 Client Connected:", socket.id);
+
   socket.on("disconnect", () => {
     console.log("❌ Client Disconnected:", socket.id);
   });
 });
 
+/* ---------------- START SERVER ---------------- */
 const PORT = process.env.PORT || 5000;
+
 server.listen(PORT, () =>
   console.log(`🚀 Server running on port ${PORT}`)
 );
-const io = new Server(server, {
-  cors: {
-    origin: "https://cafe-pos-system-wheat.vercel.app/",
-    credentials: true,
-  },
-});

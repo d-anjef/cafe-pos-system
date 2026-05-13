@@ -16,30 +16,41 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-/* ---------------- SOCKET.IO SETUP ---------------- */
+/* ---------------- ALLOWED ORIGINS ---------------- */
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
+/* ---------------- SOCKET.IO ---------------- */
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:5173",
-      process.env.CLIENT_URL,
-    ],
+    origin: allowedOrigins,
     credentials: true,
   },
 });
 
 app.set("io", io);
 
-/* ---------------- MIDDLEWARE ---------------- */
+/* ---------------- CORS MIDDLEWARE ---------------- */
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      process.env.CLIENT_URL,
-    ],
+    origin: function (origin, callback) {
+      // allow REST tools like Postman
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      console.log("❌ Blocked by CORS:", origin);
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );
 
+/* ---------------- BASIC MIDDLEWARE ---------------- */
 app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
@@ -53,7 +64,7 @@ app.use("/api/analytics", require("./routes/analyticsRoutes"));
 app.use("/api/layout", require("./routes/layoutRoutes"));
 app.use("/api/menu", require("./routes/menuRoutes"));
 
-/* ---------------- ROOT TEST ROUTE ---------------- */
+/* ---------------- HEALTH CHECK ---------------- */
 app.get("/", (req, res) => {
   res.send("🚀 Cafe POS Backend Running");
 });

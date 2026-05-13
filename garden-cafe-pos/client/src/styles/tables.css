@@ -1,0 +1,44 @@
+.table-grid-container {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 20px;
+}
+
+.table-card {
+  padding: 20px;
+  border-radius: 18px;
+  text-align: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  background: var(--glass-bg);
+  border: 1px solid var(--border-soft);
+}
+
+.table-card:hover {
+  transform: translateY(-4px);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 30px;
+  font-size: 12px;
+  margin-top: 10px;
+  text-transform: capitalize;
+}
+
+/* STATUS COLORS */
+
+.table-card.available {
+  border-left: 6px solid #4caf50;
+}
+
+.table-card.occupied {
+  border-left: 6px solid var(--primary-gold);
+}
+
+.table-card.bill_requested {
+  border-left: 6px solid #e53935;
+}

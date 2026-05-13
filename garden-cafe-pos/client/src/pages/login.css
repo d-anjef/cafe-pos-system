@@ -1,0 +1,110 @@
+.login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, var(--bg-main) 0%, #ebebeb 100%);
+  /* Subtle gradient background for depth */
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 45px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: stretch;
+  border-radius: 24px; /* More rounded for luxury */
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px); /* Stronger blur */
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6); /* Lighter, more prominent border */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1); /* Deeper shadow for elevation */
+}
+
+.login-logo {
+  font-size: 50px; /* Larger icon */
+  text-align: center;
+  margin-bottom: 10px; /* More space */
+  color: var(--primary-gold); /* Gold logo */
+}
+
+.login-title {
+  text-align: center;
+  margin: 0;
+  color: var(--text-dark); /* Dark text for contrast */
+  letter-spacing: 2px;
+  font-size: 26px; /* Larger title */
+  font-weight: 800; /* Bolder */
+}
+
+.login-subtitle {
+  text-align: center;
+  margin: -10px 0 15px 0; /* Adjust spacing */
+  opacity: 0.6; /* Softer text */
+  font-size: 14px;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* More space */
+}
+
+.login-field label {
+  font-size: 13px;
+  font-weight: 700; /* Bolder label */
+  opacity: 0.75;
+  color: var(--text-dark);
+}
+
+.login-field input {
+  padding: 14px 18px; /* Larger input area */
+  border-radius: 12px; /* More rounded inputs */
+  border: 1px solid var(--border-soft);
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.8); /* Slightly translucent input background */
+  outline: none;
+  transition: all 0.2s ease;
+  color: var(--text-dark);
+}
+
+.login-field input:focus {
+  border-color: var(--primary-gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2); /* Gold glow on focus */
+  background: white; /* Solid white on focus */
+}
+
+.login-btn {
+  width: 100%;
+  padding: 16px; /* Larger button */
+  font-size: 16px;
+  font-weight: 800; /* Bolder button text */
+  margin-top: 15px;
+  border-radius: 14px; /* More rounded button */
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); /* Shadow for CTA */
+}
+
+.login-btn:hover {
+  transform: translateY(-1px); /* Subtle lift */
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+}
+
+.login-error {
+  background: #ffe6e6; /* Softer error background */
+  color: #c0392b; /* Darker red for readability */
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  text-align: center;
+  border: 1px solid #e53935;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 30px 20px;
+    margin: 0 20px;
+  }
+}

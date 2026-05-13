@@ -19,8 +19,8 @@ const server = http.createServer(app);
 /* ---------------- ALLOWED ORIGINS ---------------- */
 const allowedOrigins = [
   "http://localhost:5173",
-  process.env.CLIENT_URL,
-].filter(Boolean);
+  "https://cafe-pos-system-2ntm1803p-anjef1010s-projects.vercel.app",
+];
 
 /* ---------------- SOCKET.IO ---------------- */
 const io = new Server(server, {
@@ -36,7 +36,8 @@ app.set("io", io);
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow REST tools like Postman
+
+      // allow Postman / server-side requests
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
@@ -44,7 +45,8 @@ app.use(
       }
 
       console.log("❌ Blocked by CORS:", origin);
-      return callback(new Error("Not allowed by CORS"));
+
+      return callback(null, false);
     },
     credentials: true,
   })

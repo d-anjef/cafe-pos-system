@@ -32,12 +32,12 @@ exports.login = async (req, res) => {
 
     // ✅ IMPORTANT: ONLY ONE COOKIE SYSTEM
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,        // required for Render (HTTPS)
-      sameSite: "none",    // required for Vercel cross-domain
-      path: "/",
-      maxAge: 8 * 60 * 60 * 1000,
-    });
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  path: "/",
+  maxAge: 8 * 60 * 60 * 1000,
+});
 
     return res.json({
       id: user._id,

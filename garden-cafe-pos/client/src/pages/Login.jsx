@@ -12,6 +12,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  /* ---------------- AUTO REDIRECT IF ALREADY LOGGED IN ---------------- */
   useEffect(() => {
     if (user) {
       if (user.role === "admin") navigate("/admin");
@@ -20,6 +21,7 @@ export default function Login() {
     }
   }, [user, navigate]);
 
+  /* ---------------- LOGIN ---------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -27,6 +29,12 @@ export default function Login() {
 
     try {
       await login(email, password);
+
+      // IMPORTANT: small delay ensures auth context updates
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 100);
+
     } catch (err) {
       setError("Invalid email or password");
     } finally {

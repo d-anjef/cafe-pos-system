@@ -7,36 +7,31 @@ import WaiterDashboard from "./pages/WaiterDashboard";
 import KitchenKDS from "./pages/KitchenKDS";
 import AdminLayoutDesigner from "./pages/admin/AdminLayoutDesigner";
 import WaiterFloorPlan from "./pages/waiter/WaiterFloorPlan";
-import ProtectedRoute from "./ProtectedRoute";
 
-/* ---------------- PROTECTED ROUTE ---------------- */
+/* ---------------- PROTECTED WRAPPER ---------------- */
 const Protected = ({ children, roles }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div
-        style={{
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#d4af37",
-          fontSize: 18,
-          background: "#f8f8f8",
-        }}
-      >
+      <div style={{
+        height: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 18,
+        color: "#d4af37",
+        background: "#f8f8f8"
+      }}>
         Loading...
       </div>
     );
   }
 
-  // not logged in
   if (!user) {
     return <Navigate to="/" replace />;
   }
 
-  // role mismatch
   if (roles && !roles.includes(user.role)) {
     return <Navigate to="/" replace />;
   }
@@ -44,23 +39,21 @@ const Protected = ({ children, roles }) => {
   return children;
 };
 
+/* ---------------- APP ---------------- */
 function App() {
   const { user, loading } = useAuth();
 
-  // app loading state
   if (loading) {
     return (
-      <div
-        style={{
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#d4af37",
-          fontSize: 18,
-          background: "#f8f8f8",
-        }}
-      >
+      <div style={{
+        height: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 18,
+        color: "#d4af37",
+        background: "#f8f8f8"
+      }}>
         Loading Application...
       </div>
     );
@@ -69,7 +62,7 @@ function App() {
   return (
     <Routes>
 
-      {/* LOGIN / HOME */}
+      {/* LOGIN */}
       <Route
         path="/"
         element={
@@ -96,7 +89,6 @@ function App() {
         element={
           <Protected roles={["admin"]}>
             <AdminDashboard />
-            <ProtectedRoute/>
           </Protected>
         }
       />
@@ -107,7 +99,6 @@ function App() {
         element={
           <Protected roles={["admin"]}>
             <AdminLayoutDesigner />
-            <ProtectedRoute/>
           </Protected>
         }
       />
@@ -118,7 +109,6 @@ function App() {
         element={
           <Protected roles={["waiter"]}>
             <WaiterDashboard />
-            <ProtectedRoute/>
           </Protected>
         }
       />
@@ -129,7 +119,6 @@ function App() {
         element={
           <Protected roles={["waiter"]}>
             <WaiterFloorPlan />
-            <ProtectedRoute/>
           </Protected>
         }
       />
@@ -140,7 +129,6 @@ function App() {
         element={
           <Protected roles={["kitchen"]}>
             <KitchenKDS />
-            <ProtectedRoute/>
           </Protected>
         }
       />

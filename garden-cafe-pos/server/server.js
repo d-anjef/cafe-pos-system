@@ -16,27 +16,31 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-/* ---------------- ALLOWED ORIGINS ---------------- */
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://cafe-pos-system-wheat.vercel.app",
-  "https://cafe-pos-system-2ntm1803p-anjef1010s-projects.vercel.app",
-];
-
 /* ---------------- SOCKET.IO ---------------- */
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: [
+      "http://localhost:5173",
+      "https://cafe-pos-system-wheat.vercel.app",
+      "https://cafe-pos-system-2ntm1803p-anjef1010s-projects.vercel.app",
+    ],
     credentials: true,
   },
 });
 
 app.set("io", io);
 
-/* ---------------- CORS MIDDLEWARE ---------------- */
+/* ---------------- CORS (FIXED) ---------------- */
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://cafe-pos-system-wheat.vercel.app",
+  "https://cafe-pos-system-2ntm1803p-anjef1010s-projects.vercel.app",
+];
+
 app.use(
   cors({
     origin: function (origin, callback) {
+      // allow server-to-server or mobile apps
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
@@ -44,11 +48,17 @@ app.use(
       }
 
       console.log("❌ Blocked by CORS:", origin);
-      return callback(new Error("Not allowed by CORS"));
+
+      // IMPORTANT: DO NOT throw error
+      return callback(null, false);
     },
     credentials: true,
   })
 );
+
+/* ---------------- HANDLE PREFLIGHT REQUESTS ---------------- */
+app.options("*", cors());
+
 /* ---------------- BASIC MIDDLEWARE ---------------- */
 app.use(express.json());
 app.use(cookieParser());

@@ -86,9 +86,3 @@
 - ✅ Detailed billing breakdown
 - ✅ Multiple payment methods
 - ✅ Professional PDF receipt generation
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend

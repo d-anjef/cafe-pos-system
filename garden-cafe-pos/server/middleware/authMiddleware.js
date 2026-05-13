@@ -3,29 +3,55 @@ const User = require("../models/User");
 
 exports.protect = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    console.log("Incoming Cookies:", req.cookies);
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "No token found" });
+    const token = req.cookies?.token;
+
+    if (!token) {
+      return res.status(401).json({
+        message: "No token found",
+      });
     }
 
-    const token = authHeader.split(" ")[1];
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({
+        message: "JWT_SECRET missing",
+      });
+    }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    let decoded;
+
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      console.log("JWT VERIFY ERROR:", err.message);
+
+      return res.status(401).json({
+        message: "Invalid token",
+      });
+    }
 
     const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
-      return res.status(401).json({ message: "User not found" });
+      return res.status(401).json({
+        message: "User not found",
+      });
     }
 
     req.user = user;
+
     next();
 
   } catch (error) {
-    return res.status(401).json({ message: "Invalid token" });
+    console.log("AUTH MIDDLEWARE ERROR:", error);
+
+    return res.status(500).json({
+      message: "Server auth error",
+    });
   }
 };
+
 exports.authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {

@@ -7,64 +7,49 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-const fetchUser = async () => {
-  try {
-    const fetchUser = async () => {
-  try {
-    const token = localStorage.getItem("token");
+  // ---------------- LOGIN ----------------
+  const login = async (email, password) => {
+    const res = await api.post("/auth/login", { email, password });
 
-    if (!token) {
+    localStorage.setItem("token", res.data.token);
+    setUser(res.data.user);
+  };
+
+  // ---------------- FETCH USER ----------------
+  const fetchUser = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      const res = await api.get("/auth/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setUser(res.data);
+    } catch (err) {
+      localStorage.removeItem("token");
       setUser(null);
+    } finally {
       setLoading(false);
-      return;
     }
+  };
 
-    const res = await api.get("/auth/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    setUser(res.data);
-  } catch {
+  // ---------------- LOGOUT ----------------
+  const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
-  } finally {
-    setLoading(false);
-  }
-};    const login = async (email, password) => {
-  const res = await api.post("/auth/login", { email, password });
-
-  localStorage.setItem("token", res.data.token);
-
-  setUser(res.data.user); // 🔥 FIXED
-};
-  } catch {
-    setUser(null);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
     fetchUser();
   }, []);
-
-  const login = async (email, password) => {
-    const res = await api.post("/auth/login", { email, password });
-    const login = async (email, password) => {
-  const res = await api.post("/auth/login", { email, password });
-
-  localStorage.setItem("token", res.data.token);
-
-  setUser(res.data.user); // 🔥 FIXED
-};
-  };
-
-  const logout = async () => {
-    await api.post("/auth/logout");
-    setUser(null);
-  };
 
   return (
     <AuthContext.Provider value={{ user, login, logout, loading }}>

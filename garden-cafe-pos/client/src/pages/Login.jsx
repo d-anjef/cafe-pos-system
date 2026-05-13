@@ -12,7 +12,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  /* ---------------- AUTO REDIRECT IF ALREADY LOGGED IN ---------------- */
+  /* ---------------- AUTO REDIRECT IF LOGGED IN ---------------- */
   useEffect(() => {
     if (user) {
       if (user.role === "admin") navigate("/admin");
@@ -21,7 +21,7 @@ export default function Login() {
     }
   }, [user, navigate]);
 
-  /* ---------------- LOGIN ---------------- */
+  /* ---------------- LOGIN HANDLER ---------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -30,10 +30,8 @@ export default function Login() {
     try {
       await login(email, password);
 
-      // IMPORTANT: small delay ensures auth context updates
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 100);
+      // ❌ NO window.location.reload / redirect here
+      // React state will handle navigation automatically
 
     } catch (err) {
       setError("Invalid email or password");
@@ -60,7 +58,7 @@ export default function Login() {
             type="email"
             placeholder="Enter your email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
@@ -71,7 +69,7 @@ export default function Login() {
             type="password"
             placeholder="Enter your password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>

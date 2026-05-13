@@ -3,15 +3,16 @@ const User = require("../models/User");
 
 exports.protect = async (req, res, next) => {
   try {
-    console.log("Incoming Cookies:", req.cookies);
+    // 🔥 FIX: read token from Authorization header (NOT cookies)
+    const authHeader = req.headers.authorization;
 
-    const token = req.cookies?.token;
-
-    if (!token) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         message: "No token found",
       });
     }
+
+    const token = authHeader.split(" ")[1];
 
     if (!process.env.JWT_SECRET) {
       return res.status(500).json({
@@ -40,7 +41,6 @@ exports.protect = async (req, res, next) => {
     }
 
     req.user = user;
-
     next();
 
   } catch (error) {
@@ -52,6 +52,7 @@ exports.protect = async (req, res, next) => {
   }
 };
 
+/* ---------------- ROLE AUTH ---------------- */
 exports.authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {

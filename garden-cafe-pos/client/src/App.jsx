@@ -20,14 +20,14 @@ const Protected = ({ children, roles }) => {
         alignItems: "center",
         justifyContent: "center",
         fontSize: 18,
-        color: "#d4af37",
-        background: "#f8f8f8"
+        color: "#d4af37"
       }}>
         Loading...
       </div>
     );
   }
 
+  // 🔥 IMPORTANT: only redirect AFTER loading finishes
   if (!user) {
     return <Navigate to="/" replace />;
   }
@@ -51,8 +51,7 @@ function App() {
         alignItems: "center",
         justifyContent: "center",
         fontSize: 18,
-        color: "#d4af37",
-        background: "#f8f8f8"
+        color: "#d4af37"
       }}>
         Loading Application...
       </div>
@@ -62,7 +61,7 @@ function App() {
   return (
     <Routes>
 
-      {/* LOGIN */}
+      {/* LOGIN ROUTE */}
       <Route
         path="/"
         element={

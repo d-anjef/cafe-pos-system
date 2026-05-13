@@ -2,7 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-/* ---------------- TOKEN ---------------- */
+/* ---------------- GENERATE TOKEN ---------------- */
 const generateToken = (user) => {
   return jwt.sign(
     { id: user._id, role: user.role },
@@ -30,13 +30,13 @@ exports.login = async (req, res) => {
 
     const token = generateToken(user);
 
-    /* ✅ FIXED COOKIE (PRODUCTION SAFE) */
+    // ✅ IMPORTANT: ONLY ONE COOKIE SYSTEM
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,        // REQUIRED for Render HTTPS
-      sameSite: "none",    // REQUIRED for Vercel cross-domain
-      path: "/",           // IMPORTANT
-      maxAge: 8 * 60 * 60 * 1000, // 8 hours
+      secure: true,        // required for Render (HTTPS)
+      sameSite: "none",    // required for Vercel cross-domain
+      path: "/",
+      maxAge: 8 * 60 * 60 * 1000,
     });
 
     return res.json({
@@ -46,7 +46,7 @@ exports.login = async (req, res) => {
     });
 
   } catch (error) {
-    console.log("LOGIN ERROR:", error);
+    console.log(error);
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -60,10 +60,10 @@ exports.logout = (req, res) => {
     path: "/",
   });
 
-  res.json({ message: "Logged out successfully" });
+  res.json({ message: "Logged out" });
 };
 
-/* ---------------- GET CURRENT USER ---------------- */
+/* ---------------- GET USER ---------------- */
 exports.getMe = async (req, res) => {
   res.json(req.user);
 };

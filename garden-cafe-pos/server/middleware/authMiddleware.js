@@ -1,15 +1,14 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-/* ---------------- PROTECT ROUTE ---------------- */
+/* ---------------- PROTECT ---------------- */
 exports.protect = async (req, res, next) => {
   try {
-    const token =
-      req.cookies.token ||
-      req.headers.authorization?.split(" ")[1];
+    // ONLY ONE SOURCE OF TRUTH: COOKIE
+    const token = req.cookies.token;
 
     if (!token) {
-      return res.status(401).json({ message: "Not authorized, no token" });
+      return res.status(401).json({ message: "Not authorized" });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -24,11 +23,11 @@ exports.protect = async (req, res, next) => {
     next();
 
   } catch (error) {
-    return res.status(401).json({ message: "Invalid or expired token" });
+    return res.status(401).json({ message: "Invalid token" });
   }
 };
 
-/* ---------------- ROLE BASED ACCESS ---------------- */
+/* ---------------- AUTHORIZE ---------------- */
 exports.authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {

@@ -16,31 +16,27 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-/* ---------------- SOCKET.IO ---------------- */
-const io = new Server(server, {
-  cors: {
-    origin: [
-      "http://localhost:5173",
-      "https://cafe-pos-system-wheat.vercel.app",
-      "https://cafe-pos-system-2ntm1803p-anjef1010s-projects.vercel.app",
-    ],
-    credentials: true,
-  },
-});
-
-app.set("io", io);
-
-/* ---------------- CORS (FIXED) ---------------- */
+/* ---------------- ALLOWED ORIGINS ---------------- */
 const allowedOrigins = [
   "http://localhost:5173",
   "https://cafe-pos-system-wheat.vercel.app",
   "https://cafe-pos-system-2ntm1803p-anjef1010s-projects.vercel.app",
 ];
 
+/* ---------------- SOCKET.IO ---------------- */
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    credentials: true,
+  },
+});
+
+app.set("io", io);
+
+/* ---------------- CORS CONFIG ---------------- */
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow server-to-server or mobile apps
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
@@ -49,15 +45,29 @@ app.use(
 
       console.log("❌ Blocked by CORS:", origin);
 
-      // IMPORTANT: DO NOT throw error
+      // DO NOT throw error (important for production)
       return callback(null, false);
     },
     credentials: true,
   })
 );
 
-/* ---------------- HANDLE PREFLIGHT REQUESTS ---------------- */
-app.options("*", cors());
+/* ---------------- HANDLE PRE-FLIGHT REQUESTS ---------------- */
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,DELETE,OPTIONS"
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
 
 /* ---------------- BASIC MIDDLEWARE ---------------- */
 app.use(express.json());

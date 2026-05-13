@@ -30,19 +30,14 @@ exports.login = async (req, res) => {
 
     const token = generateToken(user);
 
-    // ✅ IMPORTANT: ONLY ONE COOKIE SYSTEM
-    res.cookie("token", token, {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-  path: "/",
-  maxAge: 8 * 60 * 60 * 1000,
-});
-
+    // ✅ ONLY JWT RESPONSE (NO COOKIE)
     return res.json({
-      id: user._id,
-      name: user.name,
-      role: user.role,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        role: user.role,
+      },
     });
 
   } catch (error) {
@@ -53,14 +48,7 @@ exports.login = async (req, res) => {
 
 /* ---------------- LOGOUT ---------------- */
 exports.logout = (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    path: "/",
-  });
-
-  res.json({ message: "Logged out" });
+  return res.json({ message: "Logged out" });
 };
 
 /* ---------------- GET USER ---------------- */

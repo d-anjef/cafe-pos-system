@@ -14,12 +14,27 @@ export default function Login() {
 
   /* ---------------- AUTO REDIRECT IF LOGGED IN ---------------- */
   useEffect(() => {
-    if (user) {
-      if (user.role === "admin") navigate("/admin");
-      else if (user.role === "waiter") navigate("/waiter");
-      else navigate("/kitchen");
-    }
-  }, [user, navigate]);
+  if (user) {
+    if (user.role === "admin") navigate("/admin");
+    else if (user.role === "waiter") navigate("/waiter");
+    else navigate("/kitchen");
+  }
+}, [user, navigate]);
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
+
+  try {
+    await login(email, password);
+    // ❌ NO reload, NO redirect
+  } catch (err) {
+    setError("Invalid email or password");
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* ---------------- LOGIN HANDLER ---------------- */
   const handleSubmit = async (e) => {

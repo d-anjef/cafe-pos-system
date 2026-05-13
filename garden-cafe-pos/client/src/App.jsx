@@ -7,6 +7,7 @@ import WaiterDashboard from "./pages/WaiterDashboard";
 import KitchenKDS from "./pages/KitchenKDS";
 import AdminLayoutDesigner from "./pages/admin/AdminLayoutDesigner";
 import WaiterFloorPlan from "./pages/waiter/WaiterFloorPlan";
+import ProtectedRoute from "./ProtectedRoute";
 
 /* ---------------- PROTECTED ROUTE ---------------- */
 const Protected = ({ children, roles }) => {
@@ -95,6 +96,7 @@ function App() {
         element={
           <Protected roles={["admin"]}>
             <AdminDashboard />
+            <ProtectedRoute/>
           </Protected>
         }
       />
@@ -105,6 +107,7 @@ function App() {
         element={
           <Protected roles={["admin"]}>
             <AdminLayoutDesigner />
+            <ProtectedRoute/>
           </Protected>
         }
       />
@@ -115,6 +118,7 @@ function App() {
         element={
           <Protected roles={["waiter"]}>
             <WaiterDashboard />
+            <ProtectedRoute/>
           </Protected>
         }
       />
@@ -125,6 +129,7 @@ function App() {
         element={
           <Protected roles={["waiter"]}>
             <WaiterFloorPlan />
+            <ProtectedRoute/>
           </Protected>
         }
       />
@@ -135,6 +140,7 @@ function App() {
         element={
           <Protected roles={["kitchen"]}>
             <KitchenKDS />
+            <ProtectedRoute/>
           </Protected>
         }
       />

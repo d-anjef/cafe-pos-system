@@ -19,6 +19,7 @@ const server = http.createServer(app);
 /* ---------------- ALLOWED ORIGINS ---------------- */
 const allowedOrigins = [
   "http://localhost:5173",
+  "https://cafe-pos-system-wheat.vercel.app",
   "https://cafe-pos-system-2ntm1803p-anjef1010s-projects.vercel.app",
 ];
 

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import "./login.css";
 
 export default function Login() {
   const { login, user } = useAuth();
@@ -9,19 +8,17 @@ export default function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  /* ---------------- AUTO REDIRECT IF ALREADY LOGGED IN ---------------- */
   useEffect(() => {
     if (user) {
       if (user.role === "admin") navigate("/admin");
       else if (user.role === "waiter") navigate("/waiter");
       else navigate("/kitchen");
     }
-  }, [user, navigate]);
+  }, [user]);
 
-  /* ---------------- LOGIN ---------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -29,62 +26,33 @@ export default function Login() {
 
     try {
       await login(email, password);
-
-      // IMPORTANT: small delay ensures auth context updates
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 100);
-
-    } catch (err) {
-      setError("Invalid email or password");
+      window.location.href = "/";
+    } catch {
+      setError("Invalid credentials");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-container">
-      <form className="login-card glass-card" onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}>
+      <input
+        type="email"
+        placeholder="email"
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-        <div className="login-logo">🌿</div>
-        <h2 className="login-title">GARDEN & CAFE</h2>
-        <p className="login-subtitle">Staff Portal</p>
+      <input
+        type="password"
+        placeholder="password"
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
-        {error && (
-          <div className="login-error">{error}</div>
-        )}
+      <button disabled={loading}>
+        {loading ? "Loading..." : "Login"}
+      </button>
 
-        <div className="login-field">
-          <label>Email</label>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="login-field">
-          <label>Password</label>
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="gold-btn login-btn"
-          disabled={loading}
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-
-      </form>
-    </div>
+      {error && <p>{error}</p>}
+    </form>
   );
 }

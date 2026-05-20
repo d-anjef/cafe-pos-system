@@ -1,0 +1,252 @@
+/* ============================================================
+   SETTLEMENT MODAL
+   ============================================================ */
+
+.settlement-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.settlement-modal {
+  width: 100%;
+  max-width: 440px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 20px;
+}
+
+.settlement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settlement-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.settlement-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  opacity: 0.5;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.settlement-close:hover {
+  opacity: 1;
+  background: rgba(0,0,0,0.05);
+}
+
+.settlement-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  opacity: 0.55;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.settlement-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.bill-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  font-size: 14px;
+}
+
+.bill-item-name {
+  color: var(--text-dark);
+  flex: 1;
+}
+
+.bill-item-price {
+  font-weight: 600;
+  color: var(--text-dark);
+  min-width: 80px;
+  text-align: right;
+}
+
+.bill-divider {
+  border: none;
+  border-top: 2px solid var(--border-soft);
+  margin: 4px 0;
+}
+
+.bill-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+  padding: 4px 0;
+}
+
+/* ============================================================
+   PAYMENT METHOD
+   ============================================================ */
+
+.payment-method-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.payment-method-section label {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payment-methods {
+  display: flex;
+  gap: 10px;
+}
+
+.payment-btn {
+  flex: 1;
+  padding: 12px 8px;
+  border-radius: 12px;
+  border: 2px solid var(--border-soft);
+  background: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.payment-btn:hover {
+  border-color: var(--primary-gold);
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.payment-btn.active {
+  border-color: var(--primary-gold);
+  background: rgba(212, 175, 55, 0.12);
+  color: var(--primary-gold);
+}
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+
+.settlement-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.settlement-actions button {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.settlement-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   THERMAL RECEIPT PRINT
+   ============================================================ */
+
+.receipt-print {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .receipt-print,
+  .receipt-print * {
+    visibility: visible !important;
+  }
+
+  .receipt-print {
+    display: block !important;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 80mm;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    padding: 8px;
+    background: white;
+  }
+
+  .receipt-container {
+    width: 80mm;
+  }
+
+  .receipt-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 3px 0;
+    font-size: 12px;
+  }
+
+  .receipt-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 4px;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px dashed #000;
+    margin: 6px 0;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .settlement-modal {
+    padding: 20px;
+    max-width: 100%;
+  }
+
+  .payment-methods {
+    flex-direction: column;
+  }
+
+  .settlement-actions {
+    flex-direction: column;
+  }
+}

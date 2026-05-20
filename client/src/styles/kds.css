@@ -1,0 +1,231 @@
+/* ============================================================
+   KDS SHELL
+   ============================================================ */
+
+.kds-shell {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f0f0f0;
+  overflow: hidden;
+}
+
+.kds-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: white;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.kds-topbar h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+/* ============================================================
+   TICKET CONTAINER
+   ============================================================ */
+
+.kds-container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex: 1;
+  align-items: flex-start;
+}
+
+.kds-empty {
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  opacity: 0.4;
+}
+
+.kds-empty span {
+  font-size: 48px;
+}
+
+.kds-empty p {
+  font-size: 16px;
+}
+
+/* ============================================================
+   TICKET CARD
+   ============================================================ */
+
+.kds-ticket {
+  min-width: 300px;
+  max-width: 320px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-radius: 18px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.kds-ticket.all-ready {
+  border: 2px solid #4caf50;
+  background: rgba(76,175,80,0.04);
+}
+
+.kds-ticket.urgent {
+  border: 2px solid #e53935;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(229,57,53,0.2); }
+  50% { box-shadow: 0 0 0 8px rgba(229,57,53,0); }
+}
+
+/* ============================================================
+   TICKET HEADER
+   ============================================================ */
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.kds-timer {
+  background: var(--primary-gold);
+  color: white;
+  padding: 5px 12px;
+  border-radius: 30px;
+  font-weight: 800;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.kds-timer.urgent {
+  background: #e53935;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ============================================================
+   TICKET ITEMS
+   ============================================================ */
+
+.ticket-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ticket-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.9);
+  transition: all 0.2s ease;
+}
+
+.ticket-item.pending {
+  border-left: 4px solid #ff9800;
+}
+
+.ticket-item.in_progress {
+  border-left: 4px solid var(--primary-gold);
+  background: rgba(212,175,55,0.06);
+}
+
+.ticket-item.ready {
+  border-left: 4px solid #4caf50;
+  opacity: 0.7;
+  background: rgba(76,175,80,0.06);
+}
+
+.ticket-item-name {
+  font-size: 14px;
+  font-weight: 500;
+  flex: 1;
+}
+
+/* ============================================================
+   TICKET ACTIONS
+   ============================================================ */
+
+.ticket-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.kds-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kds-btn.start {
+  background: #ff9800;
+  color: white;
+}
+
+.kds-btn.ready {
+  background: #4caf50;
+  color: white;
+}
+
+.kds-btn:hover {
+  opacity: 0.85;
+  transform: scale(1.03);
+}
+
+.ready-label {
+  color: #4caf50;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* ============================================================
+   ALL READY BADGE
+   ============================================================ */
+
+.all-ready-badge {
+  background: rgba(76,175,80,0.15);
+  color: #2e7d32;
+  text-align: center;
+  padding: 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  border: 1px solid rgba(76,175,80,0.3);
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+.kds-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.kds-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.kds-container::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+  border-radius: 10px;
+}

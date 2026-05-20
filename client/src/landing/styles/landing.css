@@ -1,0 +1,91 @@
+/* ================================
+   LANDING PAGE SCOPE ONLY
+================================ */
+
+.landing-page {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg-primary, #1a1a1a);
+  color: var(--text-primary, #ffffff);
+  overflow-x: hidden;
+}
+
+.landing-page *,
+.landing-page *::before,
+.landing-page *::after {
+  box-sizing: border-box;
+}
+
+.landing-page section {
+  scroll-margin-top: 90px;
+}
+
+.landing-page .section-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.landing-page .section-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 900;
+  color: var(--text-primary, #ffffff);
+  margin: 0 0 1.25rem;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.landing-page .section-subtitle {
+  max-width: 760px;
+  margin: 0 auto;
+  color: var(--text-secondary, #cccccc);
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  line-height: 1.8;
+}
+
+.landing-page .gradient-text {
+  background: linear-gradient(
+    135deg,
+    var(--gold, #d4af37),
+    #f0c445,
+    var(--gold, #d4af37)
+  );
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: landingGradientFlow 3s ease infinite;
+}
+
+@keyframes landingGradientFlow {
+  0%,
+  100% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+}
+
+/* Buttons only inside landing */
+.landing-page .landing-btn,
+.landing-page .cta-btn,
+.landing-page .cta-primary,
+.landing-page .cta-secondary {
+  font-family: inherit;
+}
+
+/* Avoid generic spinner conflict */
+.landing-page .landing-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid rgba(212, 175, 55, 0.18);
+  border-top-color: var(--gold, #d4af37);
+  border-radius: 50%;
+  animation: landingSpin 0.9s linear infinite;
+}
+
+@keyframes landingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

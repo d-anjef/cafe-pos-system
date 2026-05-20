@@ -1,0 +1,16 @@
+.smart-cart-panel {
+  position: fixed;
+  right: 20px;
+  top: 80px;
+  width: 350px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}

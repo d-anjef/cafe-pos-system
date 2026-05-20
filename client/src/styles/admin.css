@@ -1,0 +1,760 @@
+/* ============================================================
+   ADMIN SHELL LAYOUT
+   ============================================================ */
+
+.admin-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr; /* Wider sidebar */
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg-main);
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+
+.admin-sidebar {
+  display: flex;
+  flex-direction: column;
+  padding: 28px 20px; /* More padding */
+  border-radius: 0;
+  border-right: 1px solid var(--border-soft);
+  background: white; /* Solid white background for sidebar */
+  overflow-y: auto;
+  gap: 10px; /* Increased gap */
+}
+
+.admin-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Increased gap */
+  padding: 0 8px;
+  margin-bottom: 20px; /* More space below logo */
+}
+
+.admin-logo span {
+  font-size: 32px; /* Larger icon */
+  color: var(--primary-gold);
+}
+
+.admin-logo h2 {
+  color: var(--text-dark); /* Dark text for contrast */
+  font-size: 24px; /* Larger title */
+  letter-spacing: 2.5px; /* More prominent spacing */
+  font-weight: 900; /* Even bolder */
+  margin: 0;
+}
+
+.admin-user {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px; /* More padding */
+  background: rgba(212, 175, 55, 0.08); /* Gold-tinted background */
+  border-radius: 16px; /* More rounded */
+  margin-bottom: 20px; /* More space */
+  border: 1px solid rgba(212, 175, 55, 0.15); /* Subtle gold border */
+}
+
+.admin-user span {
+  font-weight: 800; /* Bolder name */
+  font-size: 15px;
+  color: var(--text-dark);
+}
+
+.admin-user small {
+  font-size: 11px;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* More space between buttons */
+  flex: 1;
+}
+
+.sidebar-btn {
+  padding: 14px 18px; /* Larger buttons */
+  border: none;
+  border-radius: 14px; /* More rounded */
+  text-align: left;
+  font-size: 15px;
+  font-weight: 700; /* Bolder text */
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-dark);
+  transition: all 0.25s ease;
+  width: 100%;
+}
+
+.sidebar-btn:hover {
+  background: rgba(212, 175, 55, 0.15); /* Gold hover effect */
+  color: var(--primary-gold);
+}
+
+.sidebar-btn.active {
+  background: var(--primary-gold);
+  color: white;
+  box-shadow: 0 5px 20px rgba(212, 175, 55, 0.35); /* Deeper shadow for active */
+  transform: translateY(-1px); /* Subtle lift */
+}
+
+.sidebar-btn.logout-btn {
+  color: #e53935;
+  margin-top: auto;
+  margin-bottom: 0;
+  border: 1px solid rgba(229, 57, 53, 0.2); /* Subtle red border */
+}
+
+.sidebar-btn.logout-btn:hover {
+  background: rgba(229, 57, 53, 0.12); /* Softer red hover */
+  color: #e53935;
+}
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+
+.admin-content {
+  padding: 32px; /* More padding */
+  overflow-y: auto;
+  background: var(--bg-main);
+}
+
+/* ============================================================
+   TAB SHARED STYLES
+   ============================================================ */
+
+.admin-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* More space between sections */
+}
+
+.tab-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-soft); /* Subtle separator */
+}
+
+.tab-header h2 {
+  font-size: 24px; /* Larger title */
+  color: var(--text-dark);
+  font-weight: 800;
+}
+
+.tab-header small,
+.tab-header span {
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+.tab-loading, .tab-empty {
+  text-align: center;
+  padding: 80px; /* More vertical space */
+  opacity: 0.4;
+  font-size: 16px;
+  color: var(--text-dark);
+}
+
+/* ============================================================
+   KPI CARDS
+   ============================================================ */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Adaptable columns */
+  gap: 20px; /* More space */
+}
+
+.kpi-card {
+  padding: 24px; /* More padding */
+  border-radius: 18px; /* More rounded */
+  display: flex;
+  align-items: center;
+  gap: 18px; /* More space */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: var(--glass-bg); /* Use glassmorphism */
+  border: 1px solid rgba(255, 255, 255, 0.5); /* Lighter border */
+  box-shadow: var(--shadow);
+}
+
+.kpi-card:hover {
+  transform: translateY(-3px); /* More pronounced lift */
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15); /* Deeper shadow */
+}
+
+.kpi-icon {
+  font-size: 32px; /* Larger icon */
+  color: var(--primary-gold); /* Gold icon */
+}
+
+.kpi-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* Increased gap */
+}
+
+.kpi-info h4 {
+  font-size: 13px;
+  opacity: 0.65; /* Darker opacity */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.kpi-info h2 {
+  font-size: 26px; /* Larger value */
+  margin: 0;
+  color: var(--primary-gold);
+  font-weight: 900; /* Even bolder */
+}
+
+/* ============================================================
+   DASHBOARD TAB
+   ============================================================ */
+
+.dashboard-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 28px; /* More space */
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.chart-card {
+  padding: 24px; /* More padding */
+  border-radius: 18px; /* More rounded */
+  background: var(--glass-bg);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow);
+}
+
+.chart-card h3 {
+  font-size: 16px;
+  margin: 0 0 18px 0; /* More space below title */
+  opacity: 0.85;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.chart-empty {
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.4;
+  font-size: 14px;
+}
+
+/* Recharts specific styling */
+.recharts-wrapper .recharts-surface {
+  font-family: inherit !important;
+  font-size: 12px !important;
+}
+.recharts-tooltip-wrapper {
+  background: rgba(255,255,255,0.9) !important;
+  border: 1px solid rgba(0,0,0,0.1) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--shadow) !important;
+  padding: 8px 12px !important;
+  color: var(--text-dark) !important;
+  font-size: 12px !important;
+  line-height: 1.5;
+}
+.recharts-tooltip-label {
+  font-weight: 700 !important;
+  margin-bottom: 4px !important;
+  color: var(--text-dark) !important;
+}
+.recharts-tooltip-item-list {
+  padding: 0 !important;
+}
+.recharts-tooltip-item {
+  color: var(--text-dark) !important;
+}
+
+
+/* ============================================================
+   FORM STYLES
+   ============================================================ */
+
+.form-card {
+  padding: 24px 28px; /* More padding */
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* More space */
+  background: var(--glass-bg);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow);
+}
+
+.form-card h4 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Adaptable columns */
+  gap: 18px; /* More space */
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* More space */
+}
+
+.form-field label {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dark);
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea { /* Added textarea for descriptions */
+  padding: 12px 16px; /* Larger input area */
+  border-radius: 12px; /* More rounded */
+  border: 1px solid var(--border-soft);
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.8);
+  outline: none;
+  transition: all 0.2s ease;
+  color: var(--text-dark);
+  font-family: inherit;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  border-color: var(--primary-gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+  background: white;
+}
+
+/* ============================================================
+   MENU TAB
+   ============================================================ */
+
+.category-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* More space */
+}
+
+.category-title {
+  font-size: 15px;
+  font-weight: 800;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border-soft); /* Thicker separator */
+  color: var(--text-dark);
+}
+
+.menu-items-grid {
+  display: flex;
+  flex-direction: column; /* Changed to column for list view */
+  gap: 12px;
+}
+
+.menu-item-card {
+  padding: 16px 20px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  transition: all 0.2s ease;
+  background: var(--glass-bg);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow);
+}
+
+.menu-item-card.unavailable {
+  opacity: 0.6;
+  filter: grayscale(80%); /* Visually indicate unavailable */
+}
+
+.menu-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.menu-item-info strong {
+  font-size: 16px;
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+.menu-item-info small {
+  font-size: 12px;
+  opacity: 0.55;
+}
+
+.item-price {
+  font-size: 15px;
+  color: var(--primary-gold);
+  font-weight: 800;
+}
+
+.menu-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.menu-item-actions button {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  background: white;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  color: var(--text-dark);
+}
+
+.menu-item-actions button:hover {
+  border-color: var(--primary-gold);
+  color: var(--primary-gold);
+}
+
+.avail-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.avail-badge.avail {
+  background: rgba(76, 175, 80, 0.15);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.avail-badge.unavail {
+  background: rgba(229, 57, 53, 0.12);
+  color: #e53935;
+  border: 1px solid rgba(229, 57, 53, 0.3);
+}
+
+/* ============================================================
+   TABLES TAB
+   ============================================================ */
+
+.table-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Larger table cards */
+  gap: 16px;
+}
+
+.table-list-card {
+  padding: 18px 22px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--glass-bg);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.table-list-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.table-list-number {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--primary-gold);
+  min-width: 50px;
+}
+
+.table-list-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.table-list-info span {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.table-status-text {
+  font-weight: 700;
+  font-size: 12px !important;
+  text-transform: capitalize;
+  opacity: 1 !important;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: inline-block;
+  color: white; /* Status text white for better contrast */
+}
+
+/* Specific status backgrounds for table list */
+.table-status-text[style*="color: rgb(76, 175, 80)"] { background: #4caf50; }
+.table-status-text[style*="color: rgb(212, 175, 55)"] { background: var(--primary-gold); }
+.table-status-text[style*="color: rgb(229, 57, 53)"] { background: #e53935; }
+
+
+.table-list-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.table-list-actions button {
+  padding: 7px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  background: white;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.table-list-actions button:hover {
+  border-color: var(--primary-gold);
+  color: var(--primary-gold);
+}
+
+/* ============================================================
+   ORDERS TAB
+   ============================================================ */
+
+.outline-btn {
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+  background: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.outline-btn:hover {
+  border-color: var(--primary-gold);
+  color: var(--primary-gold);
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.order-card {
+  padding: 20px 24px;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--glass-bg);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow);
+}
+
+.order-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.order-card-header strong {
+  font-size: 16px;
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+.order-status-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
+}
+
+.order-status-badge.active {
+  background: rgba(212, 175, 55, 0.18);
+  color: var(--primary-gold);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.order-status-badge.completed {
+  background: rgba(76, 175, 80, 0.15);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.order-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+}
+
+.order-item-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--text-dark);
+}
+
+.order-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.order-card-footer small {
+  font-size: 12px;
+  opacity: 0.55;
+}
+
+/* ============================================================
+   LAYOUT TAB
+   ============================================================ */
+
+.layout-tab-card {
+  padding: 24px;
+  border-radius: 18px;
+  background: var(--glass-bg);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1024px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .admin-sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 12px;
+    border-right: none;
+    border-bottom: 1px solid var(--border-soft);
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .admin-logo,
+  .admin-user {
+    display: none;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex: unset;
+  }
+
+  .sidebar-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+    width: auto;
+  }
+
+  .admin-content {
+    padding: 20px;
+  }
+
+  .kpi-grid, .charts-grid, .table-list-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-card, .chart-card, .kpi-card, .menu-item-card, .order-card, .layout-tab-card {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-content {
+    padding: 15px;
+  }
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .table-list-grid {
+    grid-template-columns: 1fr;
+  }
+  .menu-item-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .settlement-modal {
+    width: 95vw;
+  }
+  .sidebar-btn {
+    flex: 1; /* Make buttons take equal width */
+    text-align: center;
+    padding: 10px;
+  }
+  .admin-sidebar {
+    justify-content: stretch;
+  }
+}

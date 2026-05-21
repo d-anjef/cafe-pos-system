@@ -24,19 +24,49 @@ const server = http.createServer(app);
 const allowedOrigins = [
   "http://localhost:5173",
   "https://cafe-pos-system-wheat.vercel.app",
-  "https://cafe-pos-system-2ntm1803p-anjef1010s-projects.vercel.app",
 ];
 
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin
+      if (!origin) return callback(null, true);
+
+      // Allow localhost + production
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Allow ALL Vercel preview deployments
+      if (origin.includes("vercel.app")) {
+        return callback(null, true);
+      }
+
+      console.log("❌ Blocked by CORS:", origin);
+
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 /* ---------------- SOCKET.IO ---------------- */
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.includes("vercel.app")
+      ) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   },
 });
-
-app.set("io", io);
-
 /* ---------------- CORS CONFIG ---------------- */
 app.use(
   cors({

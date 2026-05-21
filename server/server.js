@@ -90,6 +90,9 @@ app.use("/api/organization", require("./routes/organization"));
 app.use("/api/branches", require("./routes/branches"));
 app.use("/api/local-payments", require("./routes/localPayments"));
 app.use("/api/stripe", require("./routes/stripe"));
+app.use("/api/super-admin", require("./routes/superAdmin"));
+app.use("/api/billing", require("./routes/billing"));
+app.use("/api/staff", require("./routes/staff"));
 
 /* ---------------- HEALTH CHECK ---------------- */
 app.get("/", (req, res) => {
@@ -102,6 +105,22 @@ app.use(errorHandler);
 /* ---------------- SOCKET EVENTS ---------------- */
 io.on("connection", (socket) => {
   console.log("🔌 Client Connected:", socket.id);
+
+  // ✅ Join branch-specific room
+  socket.on("join:branch", (branchId) => {
+    if (branchId) {
+      socket.join(`branch_${branchId}`);
+      console.log(`📍 ${socket.id} joined branch_${branchId}`);
+    }
+  });
+
+  // ✅ Leave branch room
+  socket.on("leave:branch", (branchId) => {
+    if (branchId) {
+      socket.leave(`branch_${branchId}`);
+      console.log(`📤 ${socket.id} left branch_${branchId}`);
+    }
+  });
 
   socket.on("disconnect", () => {
     console.log("❌ Client Disconnected:", socket.id);

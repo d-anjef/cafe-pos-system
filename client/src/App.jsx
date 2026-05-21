@@ -13,12 +13,11 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
 /* ================= POS DASHBOARD ================= */
+import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminLayoutDesigner from "./pages/admin/AdminLayoutDesigner";
-
 import WaiterDashboard from "./pages/WaiterDashboard";
 import WaiterFloorPlan from "./pages/waiter/WaiterFloorPlan";
-
 import KitchenKDS from "./pages/KitchenKDS";
 
 /* ================= STYLES ================= */
@@ -26,33 +25,38 @@ import "./styles/global.css";
 import "./landing/styles/landing.css";
 
 /* =========================================================
-   LOADER
+   ROLE HELPER
 ========================================================= */
-
-const FullPageLoader = ({ text = "Loading..." }) => {
-  return (
-    <div className="app-loader">
-      <div className="loader-ring"></div>
-      <p>{text}</p>
-    </div>
-  );
+const getRedirectPath = (role) => {
+  switch (role) {
+    case "super_admin":    return "/super-admin";
+    case "owner":          return "/admin";
+    case "admin":          return "/admin";
+    case "branch_manager": return "/admin";
+    case "waiter":         return "/waiter";
+    case "kitchen":        return "/kitchen";
+    default:               return "/login";
+  }
 };
 
 /* =========================================================
-   PROTECTED ROUTES
+   LOADER
 ========================================================= */
+const FullPageLoader = ({ text = "Loading..." }) => (
+  <div className="app-loader">
+    <div className="loader-ring"></div>
+    <p>{text}</p>
+  </div>
+);
 
+/* =========================================================
+   PROTECTED ROUTE
+========================================================= */
 const Protected = ({ children, roles }) => {
   const { user, loading } = useAuth();
 
-  if (loading) {
-    return <FullPageLoader text="Authenticating..." />;
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
+  if (loading) return <FullPageLoader text="Authenticating..." />;
+  if (!user) return <Navigate to="/login" replace />;
   if (roles && !roles.includes(user.role)) {
     return <Navigate to="/unauthorized" replace />;
   }
@@ -61,153 +65,98 @@ const Protected = ({ children, roles }) => {
 };
 
 /* =========================================================
-   PUBLIC ROUTES
+   PUBLIC ROUTE (redirect if already logged in)
 ========================================================= */
-
 const PublicRoute = ({ children }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
-  if (user) {
-    const redirectPath =
-      user.role === "owner" || user.role === "admin"
-        ? "/admin"
-        : user.role === "waiter"
-        ? "/waiter"
-        : "/kitchen";
-
-    return <Navigate to={redirectPath} replace />;
-  }
+  if (loading) return <FullPageLoader text="Loading..." />;
+  if (user) return <Navigate to={getRedirectPath(user.role)} replace />;
 
   return children;
 };
 
 /* =========================================================
+   DASHBOARD REDIRECT
+========================================================= */
+const DashboardRedirect = () => {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  return <Navigate to={getRedirectPath(user.role)} replace />;
+};
+
+/* =========================================================
    UNAUTHORIZED PAGE
 ========================================================= */
-
-const Unauthorized = () => {
-  return (
-    <div className="unauthorized-page">
-      <div className="unauthorized-card">
-        <h1>403</h1>
-        <h2>Unauthorized Access</h2>
-        <p>You don't have permission to access this page.</p>
-      </div>
+const Unauthorized = () => (
+  <div className="unauthorized-page">
+    <div className="unauthorized-card">
+      <h1>403</h1>
+      <h2>Unauthorized Access</h2>
+      <p>You don't have permission to access this page.</p>
     </div>
-  );
-};
+  </div>
+);
 
 /* =========================================================
    APP
 ========================================================= */
-
 function App() {
   const { loading } = useAuth();
 
-  if (loading) {
-    return <FullPageLoader text="Loading Application..." />;
-  }
+  if (loading) return <FullPageLoader text="Loading Application..." />;
 
   return (
     <Routes>
 
-      {/* =====================================================
-          LANDING WEBSITE
-      ===================================================== */}
+      {/* ===== LANDING ===== */}
+      <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
+      <Route path="/features" element={<PublicRoute><Features /></PublicRoute>} />
+      <Route path="/pricing" element={<PublicRoute><Pricing /></PublicRoute>} />
+      <Route path="/about" element={<PublicRoute><About /></PublicRoute>} />
+      <Route path="/contact" element={<PublicRoute><Contact /></PublicRoute>} />
 
+      {/* ===== AUTH ===== */}
+      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+
+      {/* ===== SUPER ADMIN ===== */}
       <Route
-        path="/"
-        element={
-          <PublicRoute>
-            <Home />
-          </PublicRoute>
-        }
-      />
+  path="/super-admin"
+  element={
+    <Protected roles={["super_admin"]}>
+      <SuperAdminDashboard />
+    </Protected>
+  }
+/>
 
-      <Route
-        path="/features"
-        element={
-          <PublicRoute>
-            <Features />
-          </PublicRoute>
-        }
-      />
-
-      <Route
-        path="/pricing"
-        element={
-          <PublicRoute>
-            <Pricing />
-          </PublicRoute>
-        }
-      />
-
-      <Route
-        path="/about"
-        element={
-          <PublicRoute>
-            <About />
-          </PublicRoute>
-        }
-      />
-
-      <Route
-        path="/contact"
-        element={
-          <PublicRoute>
-            <Contact />
-          </PublicRoute>
-        }
-      />
-
-      {/* =====================================================
-          AUTH
-      ===================================================== */}
-
-      <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        }
-      />
-
-      <Route
-        path="/signup"
-        element={
-          <PublicRoute>
-            <Signup />
-          </PublicRoute>
-        }
-      />
-
-      {/* =====================================================
-          ADMIN
-      ===================================================== */}
-
+      {/* ===== ADMIN / OWNER / MANAGER ===== */}
+      <Route 
+       path="/super-admin" 
+        element={ 
+          <Protected roles={["super_admin"]}> 
+            <SuperAdminDashboard /> 
+            </Protected> 
+        }  
+        />
       <Route
         path="/admin"
         element={
-          <Protected roles={["owner", "admin"]}>
+          <Protected roles={["owner", "admin", "branch_manager"]}>
             <AdminDashboard />
           </Protected>
         }
       />
-
       <Route
         path="/admin/layout"
         element={
-          <Protected roles={["owner", "admin"]}>
+          <Protected roles={["owner", "admin", "branch_manager"]}>
             <AdminLayoutDesigner />
           </Protected>
         }
       />
 
-      {/* =====================================================
-          WAITER
-      ===================================================== */}
-
+      {/* ===== WAITER ===== */}
       <Route
         path="/waiter"
         element={
@@ -216,7 +165,6 @@ function App() {
           </Protected>
         }
       />
-
       <Route
         path="/waiter/floor"
         element={
@@ -226,10 +174,7 @@ function App() {
         }
       />
 
-      {/* =====================================================
-          KITCHEN
-      ===================================================== */}
-
+      {/* ===== KITCHEN ===== */}
       <Route
         path="/kitchen"
         element={
@@ -239,56 +184,13 @@ function App() {
         }
       />
 
-      {/* =====================================================
-          DASHBOARD REDIRECT
-      ===================================================== */}
-
-      <Route
-        path="/dashboard"
-        element={<DashboardRedirect />}
-      />
-
-      {/* =====================================================
-          UNAUTHORIZED
-      ===================================================== */}
-
-      <Route
-        path="/unauthorized"
-        element={<Unauthorized />}
-      />
-
-      {/* =====================================================
-          FALLBACK
-      ===================================================== */}
-
-      <Route
-        path="*"
-        element={<Navigate to="/" replace />}
-      />
+      {/* ===== UTILS ===== */}
+      <Route path="/dashboard" element={<DashboardRedirect />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
 
     </Routes>
   );
 }
-
-/* =========================================================
-   DASHBOARD REDIRECT
-========================================================= */
-
-const DashboardRedirect = () => {
-  const { user } = useAuth();
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  const redirectPath =
-    user.role === "owner" || user.role === "admin"
-      ? "/admin"
-      : user.role === "waiter"
-      ? "/waiter"
-      : "/kitchen";
-
-  return <Navigate to={redirectPath} replace />;
-};
 
 export default App;

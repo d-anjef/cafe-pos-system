@@ -1,0 +1,199 @@
+/* ============================================================
+   NUVLYX — Design System
+   Light/Dark Theme Variables
+============================================================ */
+
+:root[data-theme="light"] {
+  /* Backgrounds */
+  --nv-bg:           #FFFFFF;
+  --nv-bg-soft:      #FAFAFB;
+  --nv-bg-elevated:  #FFFFFF;
+  --nv-bg-overlay:   rgba(255, 255, 255, 0.7);
+
+  /* Surfaces */
+  --nv-surface:      #FFFFFF;
+  --nv-surface-2:    #F7F7F9;
+  --nv-surface-3:    #EEEEF1;
+
+  /* Glass */
+  --nv-glass:        rgba(255, 255, 255, 0.65);
+  --nv-glass-border: rgba(212, 175, 55, 0.18);
+  --nv-glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.06);
+
+  /* Text */
+  --nv-text:         #0F172A;
+  --nv-text-soft:    #475569;
+  --nv-text-muted:   #94A3B8;
+  --nv-text-invert:  #FFFFFF;
+
+  /* Borders */
+  --nv-border:       #E5E7EB;
+  --nv-border-soft:  #F1F1F3;
+
+  /* Brand (always gold) */
+  --nv-gold:         #D4AF37;
+  --nv-gold-soft:    #E5C557;
+  --nv-gold-dark:    #B8941F;
+  --nv-gold-glow:    rgba(212, 175, 55, 0.35);
+
+  /* Status */
+  --nv-success:      #10B981;
+  --nv-warning:      #F59E0B;
+  --nv-danger:       #EF4444;
+  --nv-info:         #3B82F6;
+
+  /* Gradients */
+  --nv-gradient-gold: linear-gradient(135deg, #D4AF37, #F0C445);
+  --nv-gradient-mesh: radial-gradient(at 20% 20%, rgba(212,175,55,0.08) 0%, transparent 50%),
+                      radial-gradient(at 80% 80%, rgba(212,175,55,0.05) 0%, transparent 50%);
+}
+
+:root[data-theme="dark"] {
+  /* Backgrounds */
+  --nv-bg:           #0A0A0A;
+  --nv-bg-soft:      #0F0F10;
+  --nv-bg-elevated:  #141414;
+  --nv-bg-overlay:   rgba(20, 20, 20, 0.7);
+
+  /* Surfaces */
+  --nv-surface:      #141414;
+  --nv-surface-2:    #1A1A1A;
+  --nv-surface-3:    #1F1F1F;
+
+  /* Glass */
+  --nv-glass:        rgba(20, 20, 20, 0.65);
+  --nv-glass-border: rgba(212, 175, 55, 0.22);
+  --nv-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+  /* Text */
+  --nv-text:         #FFFFFF;
+  --nv-text-soft:    #CBD5E1;
+  --nv-text-muted:   #64748B;
+  --nv-text-invert:  #0F172A;
+
+  /* Borders */
+  --nv-border:       #1F1F1F;
+  --nv-border-soft:  #141414;
+
+  /* Brand (always gold) */
+  --nv-gold:         #D4AF37;
+  --nv-gold-soft:    #E5C557;
+  --nv-gold-dark:    #B8941F;
+  --nv-gold-glow:    rgba(212, 175, 55, 0.45);
+
+  /* Status */
+  --nv-success:      #10B981;
+  --nv-warning:      #F59E0B;
+  --nv-danger:       #EF4444;
+  --nv-info:         #3B82F6;
+
+  /* Gradients */
+  --nv-gradient-gold: linear-gradient(135deg, #D4AF37, #F0C445);
+  --nv-gradient-mesh: radial-gradient(at 20% 20%, rgba(212,175,55,0.12) 0%, transparent 50%),
+                      radial-gradient(at 80% 80%, rgba(212,175,55,0.08) 0%, transparent 50%);
+}
+
+/* ============================================================
+   Global resets for NUVLYX pages
+============================================================ */
+
+.nv-root {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--nv-bg);
+  color: var(--nv-text);
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+
+.nv-root *,
+.nv-root *::before,
+.nv-root *::after {
+  box-sizing: border-box;
+}
+
+/* ============================================================
+   Reusable components
+============================================================ */
+
+.nv-glass {
+  background: var(--nv-glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--nv-glass-border);
+  box-shadow: var(--nv-glass-shadow);
+  border-radius: 16px;
+}
+
+.nv-gradient-text {
+  background: var(--nv-gradient-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nv-btn-gold {
+  background: var(--nv-gradient-gold);
+  color: #000;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.nv-btn-gold:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px var(--nv-gold-glow);
+}
+
+.nv-btn-gold:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.nv-btn-ghost {
+  background: transparent;
+  color: var(--nv-text);
+  border: 1px solid var(--nv-border);
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+  font-size: 15px;
+}
+
+.nv-btn-ghost:hover {
+  background: var(--nv-surface-2);
+  border-color: var(--nv-gold);
+}
+
+/* ============================================================
+   Theme toggle
+============================================================ */
+
+.nv-theme-toggle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--nv-border);
+  background: var(--nv-surface);
+  color: var(--nv-text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s;
+}
+
+.nv-theme-toggle:hover {
+  border-color: var(--nv-gold);
+  color: var(--nv-gold);
+  transform: rotate(20deg);
+}

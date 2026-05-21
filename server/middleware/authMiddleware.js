@@ -50,6 +50,11 @@ exports.protect = async (req, res, next) => {
       req.userId = decoded.id;
       req.organizationId = decoded.organization;
 
+      // Super admin bypass
+      if (user.role === "super_admin") {
+        return next();
+      }
+
       next();
     } catch (error) {
       return res.status(401).json({
@@ -133,18 +138,16 @@ exports.checkSubscriptionFeature = (...features) => {
       });
     }
 
-    const userFeatures = req.user.organization?.features || [];
+    const userFeatures = req.user.organization?.features || {};
 
-    const hasRequiredFeatures = features.every(feature =>
-      userFeatures.includes(feature)
+    const hasRequiredFeatures = features.every(
+      feature => userFeatures[feature] === true
     );
 
     if (!hasRequiredFeatures) {
       return res.status(403).json({
         success: false,
-        message: 'Your subscription does not include this feature',
-        requiredFeatures: features,
-        availableFeatures: userFeatures
+        message: 'Your subscription does not include this feature'
       });
     }
 
@@ -172,6 +175,11 @@ exports.verifyBranchAccess = async (req, res, next) => {
         success: false,
         message: 'Branch ID is required'
       });
+    }
+
+    if (['owner', 'admin', 'super_admin'].includes(req.user.role)) {
+      req.branchId = branchId;
+      return next();
     }
 
     // Check if user has access to this branch
@@ -280,4 +288,15 @@ exports.requireManager = (req, res, next) => {
   }
 
   next();
+};
+
+/**
+ * @desc  Shorthand role groups for reuse
+ */
+exports.ROLES = {
+  ALL_STAFF: ['super_admin', 'owner', 'admin', 'branch_manager', 'waiter', 'kitchen'],
+  MANAGEMENT: ['super_admin', 'owner', 'admin', 'branch_manager'],
+  ADMIN_UP: ['super_admin', 'owner', 'admin'],
+  OWNER_UP: ['super_admin', 'owner'],
+  SUPER_ONLY: ['super_admin'],
 };

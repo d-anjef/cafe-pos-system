@@ -1,94 +1,47 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import './FAQ.css';
 
 const faqs = [
-  {
-    question: "How does the 14-day free trial work?",
-    answer: "Sign up with your email and start using all Business plan features immediately. No credit card required. After 14 days, you can choose a plan or continue with the free tier."
-  },
-  {
-    question: "Can I switch plans anytime?",
-    answer: "Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and billing is prorated."
-  },
-  {
-    question: "What payment methods do you accept?",
-    answer: "We accept Cash, eSewa, Khalti, QR codes, and international cards through Stripe. All transactions are secure and encrypted."
-  },
-  {
-    question: "Is my data secure?",
-    answer: "Absolutely. We use bank-level encryption (256-bit SSL), secure cloud storage, and regular backups. Your data is stored on secure servers and never shared with third parties."
-  },
-  {
-    question: "Can I manage multiple branches?",
-    answer: "Yes! Business and Enterprise plans support multiple branches. You can view consolidated reports or individual branch performance from one dashboard."
-  },
-  {
-    question: "Do I need internet to use the POS?",
-    answer: "The system works best with internet for real-time sync, but it has offline mode. Orders are saved locally and automatically synced when you're back online."
-  },
-  {
-    question: "What devices are supported?",
-    answer: "Garden & Cafe POS works on any device with a web browser - tablets, smartphones, laptops, and desktop computers. We recommend tablets for waiters and large monitors for kitchen displays."
-  },
-  {
-    question: "Is training provided?",
-    answer: "Yes! We provide video tutorials, documentation, and email support for all plans. Business and Enterprise customers get priority support and optional on-site training."
-  },
-  {
-    question: "Can I export my data?",
-    answer: "Yes, you can export all your data (orders, reports, analytics) in CSV/Excel format anytime. Enterprise plan includes API access for custom integrations."
-  },
-  {
-    question: "What happens if I cancel?",
-    answer: "You can cancel anytime. Your data remains accessible for 30 days after cancellation, giving you time to export everything. No questions asked, no hidden fees."
-  }
+  { q: "How does the 14-day free trial work?", a: "Sign up with email, no credit card needed. You get full Business plan access for 14 days. After that, pick a plan or stay on Free." },
+  { q: "Can I switch plans anytime?", a: "Yes. Upgrade or downgrade anytime. Changes are immediate and billing is prorated." },
+  { q: "What payment methods do you accept?", a: "eSewa, Khalti, FonePay, bank transfer, and cash. We support all major Nepali payment options." },
+  { q: "Is my data secure?", a: "Bank-level encryption, regular backups, and isolated tenant storage. Your data is never shared." },
+  { q: "Can I manage multiple branches?", a: "Yes. Business and Enterprise plans support multi-branch with consolidated reports." },
+  { q: "Do I need internet to use NUVLYX?", a: "Works best online but supports offline mode. Orders sync automatically when reconnected." },
+  { q: "What devices are supported?", a: "Any device with a browser — tablets, phones, laptops, desktops. We recommend tablets for waiters." },
+  { q: "Is training provided?", a: "Yes. Video tutorials, docs, and email support for all plans. Business+ get priority support." },
+  { q: "Can I export my data?", a: "Anytime. Export to CSV or Excel. Enterprise includes API access." },
+  { q: "What happens if I cancel?", a: "Cancel anytime. Your data stays accessible for 30 days for export. No hidden fees." }
 ];
 
 const FAQ = () => {
-  const [openIndex, setOpenIndex] = useState(null);
-
-  const toggleFAQ = (index) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
+  const [open, setOpen] = useState(0);
 
   return (
-    <section className="faq-section">
-      <div className="faq-container">
-        <div className="section-header">
-          <h2 className="section-title">Frequently Asked Questions</h2>
-          <p className="section-subtitle">
-            Everything you need to know about Garden & Cafe POS
-          </p>
+    <section className="nv-section nv-section-soft" id="faq">
+      <div className="nv-container nv-container-narrow">
+
+        <div className="nv-section-header">
+          <div className="nv-eyebrow">FAQ</div>
+          <h2 className="nv-section-title">
+            Questions? <span className="nv-gradient-text">We've got answers</span>
+          </h2>
         </div>
 
-        <div className="faq-list">
-          {faqs.map((faq, index) => (
-            <div 
-              key={index} 
-              className={`faq-item ${openIndex === index ? 'active' : ''}`}
-            >
-              <button 
-                className="faq-question"
-                onClick={() => toggleFAQ(index)}
-              >
-                <span>{faq.question}</span>
-                <ChevronDown 
-                  size={24} 
-                  className={`faq-icon ${openIndex === index ? 'rotated' : ''}`}
-                />
+        <div className="nv-faq-list">
+          {faqs.map((faq, i) => (
+            <div key={i} className={`nv-faq-item ${open === i ? 'nv-faq-open' : ''}`}>
+              <button onClick={() => setOpen(open === i ? -1 : i)}>
+                <span>{faq.q}</span>
+                <ChevronDown size={18} className="nv-faq-chev" />
               </button>
-              <div className={`faq-answer ${openIndex === index ? 'open' : ''}`}>
-                <p>{faq.answer}</p>
+              <div className="nv-faq-answer">
+                <p>{faq.a}</p>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="faq-footer">
-          <p>Still have questions?</p>
-          <a href="/contact" className="faq-contact-btn">Contact Support</a>
-        </div>
       </div>
     </section>
   );

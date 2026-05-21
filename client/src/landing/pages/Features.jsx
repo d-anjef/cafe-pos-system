@@ -1,23 +1,24 @@
 import LandingNavbar from '../components/LandingNavbar';
 import FeatureSection from '../components/FeatureSection';
+import CTASection from '../components/CTASection';
 import Footer from '../components/Footer';
+import '../styles/nuvlyx-landing.css';
+import '../../styles/nuvlyx-theme.css';
 
-const Features = () => {
-  return (
-    <div className="landing-page">
-      <LandingNavbar />
-      <section style={{ paddingTop: '100px', minHeight: '50vh', textAlign: 'center' }}>
-        <h1 style={{ color: 'var(--gold)', fontSize: '3rem', marginBottom: '1rem' }}>
-          All Features
-        </h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '1.25rem' }}>
-          Everything you need to run your cafe efficiently
-        </p>
-      </section>
-      <FeatureSection />
-      <Footer />
+const Features = () => (
+  <div className="nv-root nv-landing">
+    <LandingNavbar />
+    <div className="nv-page-header">
+      <div className="nv-container">
+        <div className="nv-eyebrow">Features</div>
+        <h1 className="nv-page-title">Everything you need to <span className="nv-gradient-text">run smarter</span></h1>
+        <p className="nv-page-sub">Powerful tools designed for cafés in Nepal.</p>
+      </div>
     </div>
-  );
-};
+    <FeatureSection />
+    <CTASection />
+    <Footer />
+  </div>
+);
 
 export default Features;

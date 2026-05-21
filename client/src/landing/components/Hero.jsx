@@ -1,94 +1,123 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle, Play } from 'lucide-react';
-import './Hero.css';
+import { ArrowRight, Sparkles } from 'lucide-react';
 
 const Hero = () => {
   return (
-    <section className="hero">
-      <div className="hero-container">
-        <div className="hero-content">
-          <div className="hero-badge">
-            <CheckCircle size={16} />
-            <span>Trusted by 500+ cafes in Nepal</span>
+    <section className="nv-hero">
+      <div className="nv-hero-mesh" />
+
+      <div className="nv-container nv-hero-inner">
+
+        {/* BADGE */}
+        <div className="nv-hero-badge">
+          <Sparkles size={14} />
+          <span>From idea to impact</span>
+        </div>
+
+        {/* HEADLINE */}
+        <h1 className="nv-hero-title">
+          Modern POS for cafes.
+          <br />
+          <span className="nv-gradient-text">Built for Nepal.</span>
+        </h1>
+
+        <p className="nv-hero-subtitle">
+          NUVLYX powers your café with real-time orders, multi-branch management, and Nepali payments — all in one platform.
+        </p>
+
+        {/* CTA */}
+        <div className="nv-hero-cta">
+          <Link to="/signup" className="nv-btn-gold nv-hero-btn">
+            Start free trial <ArrowRight size={16} />
+          </Link>
+          <Link to="/pricing" className="nv-btn-ghost nv-hero-btn">
+            View pricing
+          </Link>
+        </div>
+
+        <div className="nv-hero-trust">
+          <span>✓ No credit card required</span>
+          <span>✓ 14-day free trial</span>
+          <span>✓ Cancel anytime</span>
+        </div>
+
+        {/* DASHBOARD PREVIEW MOCKUP */}
+        <div className="nv-hero-preview">
+          <div className="nv-preview-window">
+            <div className="nv-preview-bar">
+              <span className="nv-preview-dot" style={{background:'#ef4444'}} />
+              <span className="nv-preview-dot" style={{background:'#f59e0b'}} />
+              <span className="nv-preview-dot" style={{background:'#10b981'}} />
+              <span className="nv-preview-url">app.nuvlyx.com/dashboard</span>
+            </div>
+
+            <div className="nv-preview-body">
+              <div className="nv-preview-sidebar">
+                <div className="nv-preview-logo">
+                  <div className="nv-brand-icon" style={{width:28, height:28, fontSize:14}}>N</div>
+                  <strong>NUVLYX</strong>
+                </div>
+                <div className="nv-preview-nav-item nv-active">📊 Dashboard</div>
+                <div className="nv-preview-nav-item">🍽 Menu</div>
+                <div className="nv-preview-nav-item">🪑 Tables</div>
+                <div className="nv-preview-nav-item">📦 Orders</div>
+                <div className="nv-preview-nav-item">💳 Billing</div>
+              </div>
+
+              <div className="nv-preview-main">
+                <div className="nv-preview-kpis">
+                  <div className="nv-preview-kpi">
+                    <small>Today's Revenue</small>
+                    <strong>NPR 45,230</strong>
+                    <span style={{color:'#10b981', fontSize:11}}>↑ +12.5%</span>
+                  </div>
+                  <div className="nv-preview-kpi">
+                    <small>Active Orders</small>
+                    <strong>23</strong>
+                    <span style={{color:'var(--nv-gold)', fontSize:11}}>● Live</span>
+                  </div>
+                  <div className="nv-preview-kpi">
+                    <small>Customers</small>
+                    <strong>187</strong>
+                    <span style={{color:'#10b981', fontSize:11}}>↑ +8.2%</span>
+                  </div>
+                </div>
+
+                <div className="nv-preview-chart">
+                  <div className="nv-preview-chart-title">Last 7 days revenue</div>
+                  <div className="nv-preview-bars">
+                    {[60, 45, 75, 50, 80, 65, 90].map((h, i) => (
+                      <div key={i} style={{
+                        flex: 1,
+                        height: `${h}%`,
+                        background: 'var(--nv-gradient-gold)',
+                        borderRadius: '4px 4px 0 0',
+                        opacity: 0.85
+                      }} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <h1 className="hero-title">
-            The Modern POS System for
-            <span className="gradient-text"> Your Cafe & Restaurant</span>
-          </h1>
-
-          <p className="hero-subtitle">
-            Streamline operations, boost sales, and delight customers with our 
-            all-in-one point of sale solution. Start your 14-day free trial today.
-          </p>
-
-          <div className="hero-cta">
-            <Link to="/signup" className="cta-primary">
-              Start Free Trial
-              <ArrowRight size={20} />
-            </Link>
-            <button className="cta-secondary">
-              <Play size={20} />
-              Watch Demo
-            </button>
+          {/* FLOATING CARDS */}
+          <div className="nv-float-card nv-float-1">
+            <div style={{fontSize:24}}>💳</div>
+            <div>
+              <div style={{fontSize:11, opacity:0.6}}>Payment via</div>
+              <strong>eSewa</strong>
+            </div>
           </div>
-
-          <div className="hero-features">
-            <div className="hero-feature">
-              <CheckCircle size={18} />
-              <span>No credit card required</span>
-            </div>
-            <div className="hero-feature">
-              <CheckCircle size={18} />
-              <span>14-day free trial</span>
-            </div>
-            <div className="hero-feature">
-              <CheckCircle size={18} />
-              <span>Cancel anytime</span>
+          <div className="nv-float-card nv-float-2">
+            <div style={{fontSize:24}}>🏢</div>
+            <div>
+              <div style={{fontSize:11, opacity:0.6}}>Active branches</div>
+              <strong>5 locations</strong>
             </div>
           </div>
         </div>
 
-        <div className="hero-visual">
-          <div className="hero-image-wrapper">
-            <img 
-              src="/images/dashboard-preview.png" 
-              alt="Garden & Cafe POS Dashboard"
-              className="hero-image"
-            />
-            <div className="floating-card card-1">
-              <div className="card-icon">📊</div>
-              <div className="card-content">
-                <div className="card-label">Today's Sales</div>
-                <div className="card-value">Rs 45,230</div>
-                <div className="card-trend positive">+12.5%</div>
-              </div>
-            </div>
-            <div className="floating-card card-2">
-              <div className="card-icon">🍽️</div>
-              <div className="card-content">
-                <div className="card-label">Active Orders</div>
-                <div className="card-value">23</div>
-              </div>
-            </div>
-            <div className="floating-card card-3">
-              <div className="card-icon">⭐</div>
-              <div className="card-content">
-                <div className="card-label">Customer Rating</div>
-                <div className="card-value">4.9/5</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="hero-wave">
-        <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
-          <path 
-            fill="var(--bg-secondary)" 
-            d="M0,64L80,58.7C160,53,320,43,480,48C640,53,800,75,960,80C1120,85,1280,75,1360,69.3L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"
-          />
-        </svg>
       </div>
     </section>
   );

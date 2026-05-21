@@ -1,54 +1,23 @@
-const mongoose = require('mongoose');
+﻿const mongoose = require("mongoose");
 
 const organizationSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  slug: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true
-  },
-  owner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  logo: {
-    type: String,
-    default: null
-  },
+  name: { type: String, required: true, trim: true },
+  slug: { type: String, required: true, unique: true, lowercase: true },
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  logo: { type: String, default: null },
   brandColor: {
-    primary: { type: String, default: '#d4af37' },
-    secondary: { type: String, default: '#1a1a1a' }
+    primary: { type: String, default: "#d4af37" },
+    secondary: { type: String, default: "#1a1a1a" }
   },
   subscription: {
-    plan: {
-      type: String,
-      enum: ['free', 'starter', 'business', 'enterprise'],
-      default: 'free'
-    },
-    status: {
-      type: String,
-      enum: ['active', 'trialing', 'past_due', 'canceled', 'paused'],
-      default: 'trialing'
-    },
+    plan: { type: String, enum: ["free", "starter", "business", "enterprise"], default: "free" },
+    status: { type: String, enum: ["active", "trialing", "past_due", "canceled", "paused"], default: "trialing" },
     stripeCustomerId: String,
     stripeSubscriptionId: String,
     currentPeriodStart: Date,
     currentPeriodEnd: Date,
-    trialEndsAt: {
-      type: Date,
-      default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
-    },
-    paymentMethod: {
-      type: String,
-      enum: ['stripe', 'esewa', 'khalti', 'manual'],
-      default: 'manual'
-    }
+    trialEndsAt: { type: Date, default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) },
+    paymentMethod: { type: String, enum: ["stripe", "esewa", "khalti", "manual","bank-transfer", "cash"], default: "manual" }
   },
   limits: {
     branches: { type: Number, default: 1 },
@@ -68,35 +37,35 @@ const organizationSchema = new mongoose.Schema({
     employeeMetrics: { type: Boolean, default: false }
   },
   settings: {
-    currency: { type: String, default: 'NPR' },
-    timezone: { type: String, default: 'Asia/Kathmandu' },
-    language: { type: String, default: 'en' },
+    currency: { type: String, default: "NPR" },
+    timezone: { type: String, default: "Asia/Kathmandu" },
+    language: { type: String, default: "en" },
     taxRate: { type: Number, default: 13 },
     serviceCharge: { type: Number, default: 10 }
   },
-  contactInfo: {
-    email: String,
-    phone: String,
-    address: String,
-    website: String
-  },
-  isActive: {
-    type: Boolean,
-    default: true
-  }
-}, {
-  timestamps: true
-});
+ contactInfo: {
+  email:       String,
+  phone:       String,
+  whatsapp:    String,
+  address:     String,
+  city:        String,
+  website:     String,
+  facebook:    String,
+  instagram:   String,
+  twitter:     String,
+  googleMaps:  String,    
+  workingHours: String    
+},
+  isActive: { type: Boolean, default: true }
+}, { timestamps: true });
 
-// Auto-generate slug from name
-organizationSchema.pre('save', function(next) {
-  if (this.isModified('name') && !this.slug) {
+organizationSchema.pre("save", async function() {
+  if (this.isModified("name") && !this.slug) {
     this.slug = this.name
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
   }
-  next();
 });
 
-module.exports = mongoose.model('Organization', organizationSchema);
+module.exports = mongoose.model("Organization", organizationSchema);

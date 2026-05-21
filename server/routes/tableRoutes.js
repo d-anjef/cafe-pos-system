@@ -7,13 +7,14 @@ const {
   deleteTable,
   releaseTable
 } = require("../controllers/tableController");
-
 const { protect, authorize } = require("../middleware/authMiddleware");
 
+const MANAGEMENT = ["super_admin", "owner", "admin", "branch_manager"];
+
 router.get("/", protect, getTables);
-router.post("/", protect, authorize("admin"), createTable);
-router.put("/:id", protect, authorize("admin"), updateTable);
-router.delete("/:id", protect, authorize("admin"), deleteTable);
-router.put("/:id/release", protect, authorize("admin"), releaseTable);
+router.post("/", protect, authorize(...MANAGEMENT), createTable);
+router.put("/:id", protect, authorize(...MANAGEMENT), updateTable);
+router.delete("/:id", protect, authorize(...MANAGEMENT), deleteTable);
+router.put("/:id/release", protect, authorize(...MANAGEMENT), releaseTable);
 
 module.exports = router;

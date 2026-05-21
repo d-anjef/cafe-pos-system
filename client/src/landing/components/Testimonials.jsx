@@ -1,99 +1,83 @@
 import { Star, Quote } from 'lucide-react';
-import './Testimonials.css';
 
 const testimonials = [
   {
     name: "Rajesh Shrestha",
     role: "Owner, Himalayan Coffee House",
     location: "Thamel, Kathmandu",
-    image: "👨‍💼",
-    rating: 5,
-    text: "Garden & Cafe POS transformed our operations. The real-time kitchen display and eSewa integration are game-changers. Our order processing time reduced by 40%!"
+    text: "NUVLYX cut our order processing time by 40%. The real-time kitchen sync and eSewa integration are game-changers."
   },
   {
     name: "Sita Gurung",
     role: "Manager, Garden Bistro",
     location: "Pokhara",
-    image: "👩‍💼",
-    rating: 5,
-    text: "Managing multiple branches was a nightmare before. Now I can see everything from one dashboard. The staff performance metrics help us improve service quality."
+    text: "Managing three branches from one dashboard is incredible. The staff metrics help us improve service every week."
   },
   {
     name: "Anil Tamang",
     role: "Owner, Mountain View Cafe",
-    location: "Boudha, Kathmandu",
-    image: "👨‍🍳",
-    rating: 5,
-    text: "Best investment for our cafe! The offline mode saved us during internet issues, and the automatic VAT calculation makes accounting so much easier."
+    location: "Boudha",
+    text: "Best investment for our café. Offline mode saved us during outages, and VAT auto-calculation is a lifesaver."
   },
   {
     name: "Priya Maharjan",
     role: "Owner, Newari Kitchen",
     location: "Patan",
-    image: "👩‍🍳",
-    rating: 5,
-    text: "Our customers love the QR ordering feature. It reduced wait times and increased our revenue by 25%. The support team is also very responsive!"
+    text: "Customers love the QR ordering. Revenue is up 25% and wait times are way down. Support team is excellent."
   },
   {
     name: "Bikash Thapa",
     role: "Manager, Urban Cafe",
     location: "Lalitpur",
-    image: "👨",
-    rating: 5,
-    text: "The analytics dashboard gives us insights we never had before. We can now track which items sell best and optimize our menu accordingly."
+    text: "The analytics give us insights we never had. We optimized our menu based on data and sales jumped."
   },
   {
     name: "Anita Rai",
     role: "Owner, Tea Garden",
     location: "Thamel",
-    image: "👩",
-    rating: 5,
-    text: "Setup was incredibly easy. Within 2 hours, our entire team was trained and using the system. The tablet interface is so intuitive!"
+    text: "Setup took 2 hours. Entire team trained the same day. The tablet UI is so intuitive it just clicks."
   }
 ];
 
 const Testimonials = () => {
   return (
-    <section className="testimonials-section">
-      <div className="testimonials-container">
-        <div className="section-header">
-          <h2 className="section-title">Loved by Cafe Owners Across Nepal</h2>
-          <p className="section-subtitle">
-            Join hundreds of satisfied customers transforming their business
+    <section className="nv-section" id="testimonials">
+      <div className="nv-container">
+
+        <div className="nv-section-header">
+          <div className="nv-eyebrow">Testimonials</div>
+          <h2 className="nv-section-title">
+            Loved by cafés <span className="nv-gradient-text">across Nepal</span>
+          </h2>
+          <p className="nv-section-subtitle">
+            Real stories from real owners using NUVLYX every day.
           </p>
         </div>
 
-        <div className="testimonials-grid">
-          {testimonials.map((testimonial, index) => (
-            <div key={index} className="testimonial-card">
-              <div className="testimonial-quote">
-                <Quote size={32} />
-              </div>
-
-              <div className="testimonial-rating">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} size={16} fill="var(--gold)" color="var(--gold)" />
+        <div className="nv-testimonials-grid">
+          {testimonials.map((t, i) => (
+            <div key={i} className="nv-testimonial-card nv-glass">
+              <Quote size={24} className="nv-testimonial-quote" />
+              <div className="nv-testimonial-stars">
+                {[...Array(5)].map((_, idx) => (
+                  <Star key={idx} size={14} fill="var(--nv-gold)" color="var(--nv-gold)" />
                 ))}
               </div>
-
-              <p className="testimonial-text">"{testimonial.text}"</p>
-
-              <div className="testimonial-author">
-                <div className="author-avatar">{testimonial.image}</div>
-                <div className="author-info">
-                  <p className="author-name">{testimonial.name}</p>
-                  <p className="author-role">{testimonial.role}</p>
-                  <p className="author-location">{testimonial.location}</p>
+              <p className="nv-testimonial-text">"{t.text}"</p>
+              <div className="nv-testimonial-author">
+                <div className="nv-testimonial-avatar">
+                  {t.name.split(' ').map(w => w[0]).join('').slice(0, 2)}
+                </div>
+                <div>
+                  <strong>{t.name}</strong>
+                  <small>{t.role}</small>
+                  <small style={{ opacity: 0.5 }}>{t.location}</small>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="testimonials-cta">
-          <h3>Ready to join them?</h3>
-          <a href="/signup" className="cta-btn">Start Your Free Trial</a>
-        </div>
       </div>
     </section>
   );

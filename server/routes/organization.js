@@ -5,11 +5,21 @@ const { protect, authorize } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// @route   GET /api/organization
-// @desc    Get current organization details
-// @access  Private
+const MANAGEMENT = ["super_admin", "owner", "admin", "branch_manager"];
+const OWNER_UP = ["super_admin", "owner"];
+
+// GET /api/organization
 router.get('/', protect, async (req, res) => {
   try {
+    // ✅ super_admin has no organization
+    if (req.user.role === 'super_admin') {
+      return res.json({
+        success: true,
+        organization: null,
+        subscription: null
+      });
+    }
+
     const organization = await Organization.findById(req.user.organization)
       .populate('owner', 'name email');
 
@@ -20,7 +30,6 @@ router.get('/', protect, async (req, res) => {
       });
     }
 
-    // Get subscription details
     const subscription = await Subscription.findOne({ 
       organization: organization._id 
     }).sort('-createdAt');
@@ -40,18 +49,10 @@ router.get('/', protect, async (req, res) => {
   }
 });
 
-// @route   PUT /api/organization
-// @desc    Update organization details
-// @access  Private (Owner only)
-router.put('/', protect, authorize('owner'), async (req, res) => {
+// PUT /api/organization
+router.put('/', protect, authorize(...OWNER_UP), async (req, res) => {
   try {
-    const {
-      name,
-      logo,
-      brandColor,
-      contactInfo,
-      settings
-    } = req.body;
+    const { name, logo, brandColor, contactInfo, settings } = req.body;
 
     const organization = await Organization.findById(req.user.organization);
 
@@ -62,7 +63,6 @@ router.put('/', protect, authorize('owner'), async (req, res) => {
       });
     }
 
-    // Update fields
     if (name) organization.name = name;
     if (logo) organization.logo = logo;
     if (brandColor) organization.brandColor = { ...organization.brandColor, ...brandColor };
@@ -86,10 +86,8 @@ router.put('/', protect, authorize('owner'), async (req, res) => {
   }
 });
 
-// @route   GET /api/organization/usage
-// @desc    Get current usage statistics
-// @access  Private (Owner/Admin)
-router.get('/usage', protect, authorize('owner', 'admin'), async (req, res) => {
+// GET /api/organization/usage
+router.get('/usage', protect, authorize(...MANAGEMENT), async (req, res) => {
   try {
     const Branch = require('../models/Branch');
     const Table = require('../models/Table');

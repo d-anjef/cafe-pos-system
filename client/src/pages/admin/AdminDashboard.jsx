@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useBranch } from "../../context/BranchContext";
 import api from "../../services/api";
-import socket from "../../services/socket";
+import socket, { joinBranchRoom } from "../../services/socket";
 import {
   BarChart,
   Bar,
@@ -13,12 +14,38 @@ import {
   Tooltip,
   ResponsiveContainer
 } from "recharts";
+import BillingTab from "./BillingTab";
+import StaffTab from "./StaffTab";
+import BranchTab from "./BranchTab";
+import MenuTab from "./MenuTab.jsx";  
+import OrganizationTab from "./OrganizationTab";
 import "../../styles/admin.css";
 
 export default function AdminDashboard() {
   const { logout, user } = useAuth();
+  const { branches, activeBranch, setActiveBranch } = useBranch();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
+
+  // ============================================================
+  // ✅ FIX: NO BRANCH SELECTED CHECK
+  // ============================================================
+  if (!activeBranch && user?.role !== "super_admin") {
+    return (
+      <div className="admin-shell">
+        <div className="admin-content">
+          <div className="tab-loading">
+            No branch selected.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  useEffect(() => {
+    if (!activeBranch) return;
+    joinBranchRoom(activeBranch._id);
+  }, [activeBranch]);
 
   const handleLogout = async () => {
     await logout();
@@ -30,7 +57,21 @@ export default function AdminDashboard() {
     { key: "menu", label: "🍽 Menu" },
     { key: "tables", label: "🪑 Tables" },
     { key: "orders", label: "📦 Orders" },
-    { key: "layout", label: "🗺 Floor Plan" }
+    { key: "layout", label: "🗺 Floor Plan" },
+    ...(["owner", "admin"].includes(user?.role) 
+      ? [{ key: "staff", label: "👥 Staff" }] 
+      : []),
+     ...(["owner", "admin", "branch_manager"].includes(user?.role)    
+       ? [{ key: "branches", label: "🏢 Branches" }]
+         : []), 
+      ...(user?.role === "owner" 
+          ? [{ key: "billing", label: "💳 Billing" }] 
+           : []),
+
+       ...(user?.role === "owner"
+         ? [{ key: "organization", label: "🏢 Organization" }]
+            : []),
+      
   ];
 
   return (
@@ -39,15 +80,51 @@ export default function AdminDashboard() {
       {/* SIDEBAR */}
       <div className="admin-sidebar glass-card">
 
-        <div className="admin-logo">
-          <span>🌿</span>
-          <h2>GARDEN</h2>
-        </div>
+  <div className="admin-logo">
+    {user?.organization?.logo ? (
+      <img 
+        src={user.organization.logo} 
+        alt={user.organization.name}
+        style={{ width: 32, height: 32, borderRadius: 6, objectFit: "cover" }}
+      />
+    ) : (
+      <span>{user?.organization?.name?.charAt(0)?.toUpperCase() || "N"}</span>
+    )}
+    <h2>{user?.organization?.name?.toUpperCase() || "NUVLYX"}</h2>
+  </div>
 
-        <div className="admin-user">
-          <span>{user?.name}</span>
-          <small>Administrator</small>
-        </div>
+  <div className="admin-user">
+    <span>{user?.name}</span>
+    <small style={{ textTransform: "capitalize" }}>
+      {user?.role?.replace("_", " ") || "Administrator"}
+    </small>
+  </div>
+
+        {/* ============================================================
+            ✅ FIX: ONLY SHOW BRANCH SELECTOR FOR NON-SUPER_ADMIN
+            ============================================================ */}
+        {user?.role !== "super_admin" && branches.length > 0 && (
+          <select
+            value={activeBranch?._id || ""}
+            onChange={(e) => {
+              const selected = branches.find(b => b._id === e.target.value);
+              setActiveBranch(selected);
+            }}
+            style={{
+              padding: "8px",
+              borderRadius: 8,
+              marginBottom: 16,
+              width: "100%"
+            }}
+          >
+            <option value="" disabled>Select a branch</option>
+            {branches.map(branch => (
+              <option key={branch._id} value={branch._id}>
+                {branch.name}
+              </option>
+            ))}
+          </select>
+        )}
 
         <div className="sidebar-nav">
           {tabs.map(tab => (
@@ -78,6 +155,11 @@ export default function AdminDashboard() {
         {activeTab === "tables" && <TablesTab />}
         {activeTab === "orders" && <OrdersTab />}
         {activeTab === "layout" && <LayoutTab navigate={navigate} />}
+        {activeTab === "billing" && <BillingTab />}
+        {activeTab === "staff" && <StaffTab />}
+        {activeTab === "branches" && <BranchTab />}
+        {activeTab === "organization" && <OrganizationTab />}
+        
 
       </div>
     </div>
@@ -91,10 +173,11 @@ export default function AdminDashboard() {
 function DashboardTab() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { activeBranch } = useBranch();
 
   const loadAnalytics = async () => {
     try {
-      const res = await api.get("/analytics/dashboard");
+      const res = await api.get(`/analytics/dashboard?branchId=${activeBranch?._id}`);
       setData(res.data);
     } catch (err) {
       console.error("Analytics error:", err);
@@ -104,6 +187,7 @@ function DashboardTab() {
   };
 
   useEffect(() => {
+    if (!activeBranch) return;
     loadAnalytics();
 
     socket.on("order:completed", () => {
@@ -111,7 +195,7 @@ function DashboardTab() {
     });
 
     return () => socket.off("order:completed");
-  }, []);
+  }, [activeBranch]);
 
   if (loading) return (
     <div className="tab-loading">Loading analytics...</div>
@@ -253,226 +337,6 @@ function DashboardTab() {
     </div>
   );
 }
-
-// ============================================================
-// ✅ MENU TAB
-// ============================================================
-
-function MenuTab() {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [editItem, setEditItem] = useState(null);
-  const [form, setForm] = useState({
-    name: "",
-    price: "",
-    category: "Beverages",
-    description: ""
-  });
-
-  const categories = [
-    "Beverages",
-    "Snacks",
-    "Meals",
-    "Desserts",
-    "General"
-  ];
-
-  const loadItems = async () => {
-    const res = await api.get("/menu/item");
-    setItems(res.data);
-  };
-
-  useEffect(() => { loadItems(); }, []);
-
-  const handleSubmit = async () => {
-    if (!form.name || !form.price) {
-      return alert("Name and price are required");
-    }
-
-    setLoading(true);
-    try {
-      if (editItem) {
-        await api.put(`/menu/item/${editItem._id}`, form);
-        setEditItem(null);
-      } else {
-        await api.post("/menu/item", form);
-      }
-      setForm({
-        name: "",
-        price: "",
-        category: "Beverages",
-        description: ""
-      });
-      loadItems();
-    } catch (err) {
-      alert("Failed to save item");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEdit = (item) => {
-    setEditItem(item);
-    setForm({
-      name: item.name,
-      price: item.price,
-      category: item.category,
-      description: item.description || ""
-    });
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this item?")) return;
-    await api.delete(`/menu/item/${id}`);
-    loadItems();
-  };
-
-  const handleToggle = async (id) => {
-    await api.put(`/menu/item/${id}/toggle`);
-    loadItems();
-  };
-
-  const handleCancel = () => {
-    setEditItem(null);
-    setForm({
-      name: "",
-      price: "",
-      category: "Beverages",
-      description: ""
-    });
-  };
-
-  const grouped = categories.reduce((acc, cat) => {
-    acc[cat] = items.filter(i => i.category === cat);
-    return acc;
-  }, {});
-
-  return (
-    <div className="admin-tab">
-      <div className="tab-header">
-        <h2>Menu Management</h2>
-        <span>{items.length} items</span>
-      </div>
-
-      {/* FORM */}
-      <div className="glass-card form-card">
-        <h4>
-          {editItem ? `✏️ Edit: ${editItem.name}` : "➕ Add New Item"}
-        </h4>
-
-        <div className="form-grid">
-          <div className="form-field">
-            <label>Item Name *</label>
-            <input
-              placeholder="e.g. Cappuccino"
-              value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
-            />
-          </div>
-
-          <div className="form-field">
-            <label>Price (₹) *</label>
-            <input
-              type="number"
-              placeholder="e.g. 150"
-              value={form.price}
-              onChange={e => setForm({ ...form, price: e.target.value })}
-            />
-          </div>
-
-          <div className="form-field">
-            <label>Category</label>
-            <select
-              value={form.category}
-              onChange={e => setForm({ ...form, category: e.target.value })}
-            >
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-field">
-            <label>Description</label>
-            <input
-              placeholder="Optional description"
-              value={form.description}
-              onChange={e => setForm({ ...form, description: e.target.value })}
-            />
-          </div>
-        </div>
-
-        <div style={{ display: "flex", gap: 10 }}>
-          <button
-            className="gold-btn"
-            onClick={handleSubmit}
-            disabled={loading}
-          >
-            {loading
-              ? "Saving..."
-              : editItem ? "Update Item" : "Add Item"
-            }
-          </button>
-
-          {editItem && (
-            <button onClick={handleCancel}>
-              Cancel
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ITEMS BY CATEGORY */}
-      {categories.map(cat => (
-        grouped[cat].length > 0 && (
-          <div key={cat} className="category-section">
-            <h3 className="category-title">{cat}</h3>
-            <div className="menu-items-grid">
-              {grouped[cat].map(item => (
-                <div
-                  key={item._id}
-                  className={`menu-item-card glass-card ${!item.isAvailable ? "unavailable" : ""}`}
-                >
-                  <div className="menu-item-info">
-                    <strong>{item.name}</strong>
-                    <span className="item-price">₹ {item.price}</span>
-                    {item.description && (
-                      <small>{item.description}</small>
-                    )}
-                  </div>
-
-                  <div className="menu-item-actions">
-                    <span
-                      className={`avail-badge ${item.isAvailable ? "avail" : "unavail"}`}
-                    >
-                      {item.isAvailable ? "Available" : "Unavailable"}
-                    </span>
-
-                    <button onClick={() => handleToggle(item._id)}>
-                      {item.isAvailable ? "Disable" : "Enable"}
-                    </button>
-
-                    <button onClick={() => handleEdit(item)}>
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(item._id)}
-                      style={{ color: "#e53935" }}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )
-      ))}
-    </div>
-  );
-}
-
 // ============================================================
 // ✅ TABLES TAB
 // ============================================================
@@ -483,18 +347,20 @@ function TablesTab() {
     tableNumber: "",
     capacity: ""
   });
+  const { activeBranch } = useBranch();
 
   const loadTables = async () => {
-    const res = await api.get("/tables");
+    const res = await api.get(`/tables?branchId=${activeBranch._id}`);
     setTables(res.data);
   };
 
   useEffect(() => {
+    if (!activeBranch) return;
     loadTables();
 
     socket.on("table:update", () => loadTables());
     return () => socket.off("table:update");
-  }, []);
+  }, [activeBranch]);
 
   const handleAdd = async () => {
     if (!form.tableNumber || !form.capacity) {
@@ -503,6 +369,7 @@ function TablesTab() {
 
     try {
       await api.post("/tables", {
+        branchId: activeBranch._id,
         tableNumber: parseInt(form.tableNumber),
         capacity: parseInt(form.capacity)
       });
@@ -652,6 +519,7 @@ function OrdersTab() {
   const [orders, setOrders] = useState([]);
   const [view, setView] = useState("active");
   const [loading, setLoading] = useState(false);
+  const { activeBranch } = useBranch();
 
   // BILL STATES
 
@@ -755,7 +623,7 @@ function OrdersTab() {
 
       const res = await api.get(
         view === "active"
-          ? "/orders/active"
+          ? `/orders/active?branchId=${activeBranch._id}`
           : "/orders/completed"
       );
 
@@ -776,6 +644,7 @@ function OrdersTab() {
   // ============================================================
 
   useEffect(() => {
+    if (!activeBranch) return;
 
     loadOrders();
 
@@ -790,13 +659,11 @@ function OrdersTab() {
     );
 
     return () => {
-
       socket.off("order:new");
-
       socket.off("order:completed");
     };
 
-  }, [view]);
+  }, [view, activeBranch]);
 
   // ============================================================
   // UI
@@ -1314,10 +1181,12 @@ function OrdersTab() {
 
 function LayoutTab({ navigate }) {
   const [tables, setTables] = useState([]);
+  const { activeBranch } = useBranch();
 
   useEffect(() => {
-    api.get("/tables").then(res => setTables(res.data));
-  }, []);
+    if (!activeBranch) return;
+    api.get(`/tables?branchId=${activeBranch._id}`).then(res => setTables(res.data));
+  }, [activeBranch]);
 
   const available = tables.filter(t => t.status === "available").length;
   const occupied = tables.filter(t => t.status === "occupied").length;

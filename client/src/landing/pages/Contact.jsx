@@ -1,107 +1,124 @@
 import { useState } from 'react';
 import LandingNavbar from '../components/LandingNavbar';
 import Footer from '../components/Footer';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import '../styles/nuvlyx-landing.css';
+import '../../styles/nuvlyx-theme.css';
 
 const Contact = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [data, setData] = useState({ name: '', email: '', message: '' });
+  const [sent, setSent] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert('Thank you! We will contact you soon.');
-    setFormData({ name: '', email: '', message: '' });
+    setSent(true);
+    setTimeout(() => {
+      setData({ name: '', email: '', message: '' });
+      setSent(false);
+    }, 3000);
   };
 
   return (
-    <div className="landing-page">
+    <div className="nv-root nv-landing">
       <LandingNavbar />
-      <section style={{ 
-        paddingTop: '120px', 
-        minHeight: '70vh', 
-        maxWidth: '600px', 
-        margin: '0 auto',
-        padding: '120px 2rem 4rem'
-      }}>
-        <h1 style={{ color: 'var(--gold)', fontSize: '3rem', marginBottom: '2rem', textAlign: 'center' }}>
-          Contact Us
-        </h1>
-        
-        <div style={{ marginBottom: '3rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>
-            <Mail size={20} />
-            <span>support@gardencafe.com</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>
-            <Phone size={20} />
-            <span>+977-1-4123456</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-secondary)' }}>
-            <MapPin size={20} />
-            <span>Thamel, Kathmandu, Nepal</span>
+
+      <div className="nv-page-header">
+        <div className="nv-container">
+          <div className="nv-eyebrow">Contact</div>
+          <h1 className="nv-page-title">Let's <span className="nv-gradient-text">talk</span></h1>
+          <p className="nv-page-sub">Got questions? Want a demo? We'd love to hear from you.</p>
+        </div>
+      </div>
+
+      <section className="nv-section">
+        <div className="nv-container">
+          <div className="nv-contact-grid">
+
+            {/* CONTACT INFO */}
+            <div className="nv-contact-info">
+              <h3>Get in touch</h3>
+              <div className="nv-contact-item">
+                <Mail size={20} />
+                <div>
+                  <small>Email</small>
+                  <strong>hello@nuvlyx.com</strong>
+                </div>
+              </div>
+              <div className="nv-contact-item">
+                <Phone size={20} />
+                <div>
+                  <small>Phone</small>
+                  <strong>+977-1-4123456</strong>
+                </div>
+              </div>
+              <div className="nv-contact-item">
+                <MapPin size={20} />
+                <div>
+                  <small>Office</small>
+                  <strong>Thamel, Kathmandu, Nepal</strong>
+                </div>
+              </div>
+            </div>
+
+            {/* CONTACT FORM */}
+            <form onSubmit={handleSubmit} className="nv-contact-form nv-glass">
+              {sent ? (
+                <div style={{textAlign:'center', padding:'40px 20px'}}>
+                  <div style={{fontSize:48}}>✅</div>
+                  <h3>Message sent!</h3>
+                  <p style={{opacity:0.6}}>We'll get back within 24 hours.</p>
+                </div>
+              ) : (
+                <>
+                  <h3>Send us a message</h3>
+
+                  <div className="nv-input-group">
+                    <label>Name</label>
+                    <input
+                      type="text"
+                      value={data.name}
+                      onChange={e => setData({...data, name: e.target.value})}
+                      placeholder="Your name"
+                      required
+                      style={{padding:12, border:'1px solid var(--nv-border)', borderRadius:10, background:'var(--nv-surface)', color:'var(--nv-text)'}}
+                    />
+                  </div>
+
+                  <div className="nv-input-group">
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      value={data.email}
+                      onChange={e => setData({...data, email: e.target.value})}
+                      placeholder="you@company.com"
+                      required
+                      style={{padding:12, border:'1px solid var(--nv-border)', borderRadius:10, background:'var(--nv-surface)', color:'var(--nv-text)'}}
+                    />
+                  </div>
+
+                  <div className="nv-input-group">
+                    <label>Message</label>
+                    <textarea
+                      value={data.message}
+                      onChange={e => setData({...data, message: e.target.value})}
+                      placeholder="How can we help?"
+                      required
+                      rows={5}
+                      style={{padding:12, border:'1px solid var(--nv-border)', borderRadius:10, background:'var(--nv-surface)', color:'var(--nv-text)', resize:'vertical', fontFamily:'inherit'}}
+                    />
+                  </div>
+
+                  <button type="submit" className="nv-btn-gold" style={{width:'100%', padding:14}}>
+                    Send message <Send size={16} />
+                  </button>
+                </>
+              )}
+            </form>
+
           </div>
         </div>
-
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <input
-            type="text"
-            placeholder="Your Name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-            style={{
-              padding: '1rem',
-              background: 'var(--bg-secondary)',
-              border: '2px solid var(--border)',
-              borderRadius: '8px',
-              color: 'var(--text-primary)',
-              fontSize: '1rem'
-            }}
-          />
-          <input
-            type="email"
-            placeholder="Your Email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            required
-            style={{
-              padding: '1rem',
-              background: 'var(--bg-secondary)',
-              border: '2px solid var(--border)',
-              borderRadius: '8px',
-              color: 'var(--text-primary)',
-              fontSize: '1rem'
-            }}
-          />
-          <textarea
-            placeholder="Your Message"
-            value={formData.message}
-            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-            required
-            rows={5}
-            style={{
-              padding: '1rem',
-              background: 'var(--bg-secondary)',
-              border: '2px solid var(--border)',
-              borderRadius: '8px',
-              color: 'var(--text-primary)',
-              fontSize: '1rem',
-              resize: 'vertical'
-            }}
-          />
-          <button type="submit" style={{
-            padding: '1rem',
-            background: 'var(--gold)',
-            color: '#000',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '1.1rem',
-            fontWeight: '700',
-            cursor: 'pointer'
-          }}>
-            Send Message
-          </button>
-        </form>
       </section>
+
       <Footer />
     </div>
   );

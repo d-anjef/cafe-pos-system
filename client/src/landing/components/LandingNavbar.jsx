@@ -1,39 +1,86 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, X, ChevronDown } from 'lucide-react';
-import './LandingNavbar.css';
+import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
+import ThemeToggle from '../../components/ThemeToggle';
 
 const LandingNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location]);
+
+  const navLinks = [
+    { to: '/features', label: 'Features' },
+    { to: '/pricing',  label: 'Pricing' },
+    { to: '/about',    label: 'About' },
+    { to: '/contact',  label: 'Contact' },
+  ];
 
   return (
-    <nav className="landing-navbar">
-      <div className="landing-navbar-container">
-        <Link to="/" className="landing-logo">
-          <span className="logo-icon">🌿</span>
-          <span className="logo-text">Garden & Cafe POS</span>
+    <nav className={`nv-nav ${scrolled ? 'nv-nav-scrolled' : ''}`}>
+      <div className="nv-nav-inner">
+
+        {/* LOGO */}
+        <Link to="/" className="nv-nav-logo">
+          <div className="nv-nav-logo-icon">N</div>
+          <span>NUVLYX</span>
         </Link>
 
-        <div className={`landing-nav-links ${isOpen ? 'mobile-open' : ''}`}>
-          <Link to="/features" className="nav-link">Features</Link>
-          <Link to="/pricing" className="nav-link">Pricing</Link>
-          <Link to="/about" className="nav-link">About</Link>
-          <Link to="/contact" className="nav-link">Contact</Link>
-          
-          <div className="nav-actions">
-            <Link to="/login" className="nav-btn login-btn">Login</Link>
-            <Link to="/signup" className="nav-btn signup-btn">Start Free Trial</Link>
-          </div>
+        {/* DESKTOP LINKS */}
+        <div className="nv-nav-links">
+          {navLinks.map(link => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`nv-nav-link ${location.pathname === link.to ? 'nv-active' : ''}`}
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
 
-        <button 
-          className="mobile-menu-toggle" 
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle menu"
-        >
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        {/* ACTIONS */}
+        <div className="nv-nav-actions">
+          <ThemeToggle />
+          <Link to="/login" className="nv-nav-login">Sign in</Link>
+          <Link to="/signup" className="nv-btn-gold nv-nav-cta">
+            Start Free Trial
+          </Link>
+
+          <button
+            className="nv-mobile-toggle"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Menu"
+          >
+            {isOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
+
       </div>
+
+      {/* MOBILE MENU */}
+      {isOpen && (
+        <div className="nv-mobile-menu">
+          {navLinks.map(link => (
+            <Link key={link.to} to={link.to} className="nv-mobile-link">
+              {link.label}
+            </Link>
+          ))}
+          <Link to="/login" className="nv-mobile-link">Sign in</Link>
+          <Link to="/signup" className="nv-btn-gold" style={{ width: '100%' }}>
+            Start Free Trial
+          </Link>
+        </div>
+      )}
     </nav>
   );
 };

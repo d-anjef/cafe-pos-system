@@ -1,120 +1,58 @@
-import { 
-  Smartphone, 
-  TrendingUp, 
-  Users, 
-  CreditCard, 
-  Wifi, 
-  Lock,
-  BarChart3,
-  MessageSquare,
-  Clock,
-  Zap,
-  Globe,
-  HeadphonesIcon
-} from 'lucide-react';
-import './FeatureSection.css';
+import { Building2, CreditCard, WifiOff, ChefHat, Smartphone } from 'lucide-react';
 
 const features = [
   {
-    icon: <Smartphone size={32} />,
-    title: 'Mobile & Tablet Ready',
-    description: 'Works perfectly on any device. Take orders from anywhere in your restaurant.',
-    color: '#3b82f6'
+    icon: <Building2 size={26} />,
+    title: 'Multi-branch ready',
+    description: 'Manage multiple locations from one unified dashboard. Compare performance, share menus, scale fast.',
   },
   {
-    icon: <TrendingUp size={32} />,
-    title: 'Real-Time Analytics',
-    description: 'Track sales, monitor performance, and make data-driven decisions instantly.',
-    color: '#10b981'
+    icon: <CreditCard size={26} />,
+    title: 'Nepali payments',
+    description: 'Accept eSewa, Khalti, FonePay, cash, and cards. Built for the Nepali market from day one.',
   },
   {
-    icon: <Users size={32} />,
-    title: 'Staff Management',
-    description: 'Monitor employee performance, manage shifts, and calculate commissions easily.',
-    color: '#f59e0b'
+    icon: <WifiOff size={26} />,
+    title: 'Works offline',
+    description: 'Internet down? No problem. Orders save locally and auto-sync the moment you reconnect.',
   },
   {
-    icon: <CreditCard size={32} />,
-    title: 'Multiple Payments',
-    description: 'Accept Cash, eSewa, Khalti, QR codes, and tap-to-pay in one system.',
-    color: '#8b5cf6'
+    icon: <ChefHat size={26} />,
+    title: 'Real-time kitchen',
+    description: 'Live order tickets to your kitchen display. Track timers, statuses, and never miss an order.',
   },
   {
-    icon: <Wifi size={32} />,
-    title: 'Works Offline',
-    description: 'Continue operations even without internet. Auto-sync when connected.',
-    color: '#ef4444'
+    icon: <Smartphone size={26} />,
+    title: 'Waiter mobile app',
+    description: 'Take orders tableside on any phone or tablet. Fast, intuitive, and works everywhere.',
   },
-  {
-    icon: <Lock size={32} />,
-    title: 'Secure & Compliant',
-    description: 'Bank-level encryption, secure payments, and automatic VAT calculation.',
-    color: '#06b6d4'
-  },
-  {
-    icon: <BarChart3 size={32} />,
-    title: 'Multi-Branch Support',
-    description: 'Manage multiple locations from one dashboard. Compare performance across branches.',
-    color: '#d4af37'
-  },
-  {
-    icon: <MessageSquare size={32} />,
-    title: 'Customer QR Ordering',
-    description: 'Let customers scan QR codes to view menu and place orders directly.',
-    color: '#ec4899'
-  },
-  {
-    icon: <Clock size={32} />,
-    title: 'Kitchen Display System',
-    description: 'Real-time order tickets for kitchen with status tracking and timers.',
-    color: '#14b8a6'
-  },
-  {
-    icon: <Zap size={32} />,
-    title: 'Lightning Fast',
-    description: 'Optimized for speed. Process orders and payments in seconds.',
-    color: '#f97316'
-  },
-  {
-    icon: <Globe size={32} />,
-    title: 'Multi-Language',
-    description: 'Support for English and Nepali with more languages coming soon.',
-    color: '#6366f1'
-  },
-  {
-    icon: <HeadphonesIcon size={32} />,
-    title: '24/7 Support',
-    description: 'Get help whenever you need it. Priority support for business plans.',
-    color: '#a855f7'
-  }
 ];
 
 const FeatureSection = () => {
   return (
-    <section className="features-section">
-      <div className="features-container">
-        <div className="section-header">
-          <h2 className="section-title">Everything You Need to Run Your Cafe</h2>
-          <p className="section-subtitle">
-            Powerful features designed specifically for cafes and restaurants in Nepal
+    <section className="nv-section" id="features">
+      <div className="nv-container">
+
+        <div className="nv-section-header">
+          <div className="nv-eyebrow">Features</div>
+          <h2 className="nv-section-title">
+            Everything you need to <span className="nv-gradient-text">run smarter</span>
+          </h2>
+          <p className="nv-section-subtitle">
+            Built for cafés in Nepal. Loved by owners who want clarity, control, and growth.
           </p>
         </div>
 
-        <div className="features-grid">
-          {features.map((feature, index) => (
-            <div 
-              key={index} 
-              className="feature-card"
-              style={{ '--accent-color': feature.color }}
-            >
-              <div className="feature-icon" style={{ color: feature.color }}>
-                {feature.icon}
-              </div>
-              <h3 className="feature-title">{feature.title}</h3>
-              <p className="feature-description">{feature.description}</p>
+        <div className="nv-features-grid">
+          {features.map((f, i) => (
+            <div key={i} className="nv-feature-card nv-glass">
+              <div className="nv-feature-icon">{f.icon}</div>
+              <h3>{f.title}</h3>
+              <p>{f.description}</p>
             </div>
           ))}
         </div>
+
       </div>
     </section>
   );

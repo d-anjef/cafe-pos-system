@@ -20,7 +20,7 @@ const subscriptionSchema = new mongoose.Schema({
   
   provider: {
     type: String,
-    enum: ['stripe', 'esewa', 'khalti', 'manual'],
+    enum: ['stripe', 'esewa', 'khalti', 'manual', 'bank-transfer', 'cash'],
     required: true
   },
   providerCustomerId: String,
@@ -58,6 +58,17 @@ const subscriptionSchema = new mongoose.Schema({
     invoiceUrl: String,
     transactionId: String
   }],
+  pendingUpgrade: {
+  plan: String,
+  billingCycle: String,
+  amount: Number,
+  paymentMethod: String,
+  transactionRef: String,
+  notes: String,
+  requestedAt: Date,
+  requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" }
+},
   
   usage: {
     branches: { type: Number, default: 0 },
@@ -70,6 +81,7 @@ const subscriptionSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  
   lastReminderSent: Date
 }, {
   timestamps: true

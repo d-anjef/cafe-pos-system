@@ -9,33 +9,92 @@ export const AuthProvider = ({ children }) => {
 
   /* ---------------- LOGIN ---------------- */
   const login = async (email, password) => {
-    const res = await api.post("/auth/login", { email, password });
+    try {
+      const res = await api.post("/auth/login", { email, password });
 
-    localStorage.setItem("token", res.data.token);
-    setUser(res.data.user);
+      if (res.data.success && res.data.token) {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        setUser(res.data.user);
+        return res.data.user;
+      } else {
+        throw new Error(res.data.message || "Login failed");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
+    }
+  };
 
-    return res.data.user;
+  /* ---------------- REGISTER (NEW) ---------------- */
+  const register = async (organizationName, name, email, password) => {
+    try {
+      const res = await api.post("/auth/register", {
+        organizationName,
+        name,
+        email,
+        password
+      });
+
+      if (res.data.success && res.data.token) {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        setUser(res.data.user);
+        return res.data.user;
+      } else {
+        throw new Error(res.data.message || "Registration failed");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      throw error;
+    }
   };
 
   /* ---------------- FETCH USER ---------------- */
   const fetchUser = async () => {
     try {
       const token = localStorage.getItem("token");
+      const savedUser = localStorage.getItem("user");
 
       if (!token) {
         setUser(null);
+        setLoading(false);
         return;
       }
 
-      const res = await api.get("/auth/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // Try to use saved user first (for faster UI)
+      if (savedUser) {
+        try {
+          const parsedUser = JSON.parse(savedUser);
+          setUser(parsedUser);
+        } catch (e) {
+          console.error("Error parsing saved user:", e);
+        }
+      }
 
-      setUser(res.data);
+      // Verify with server (silently handle errors)
+      try {
+        const res = await api.get("/auth/me");
+
+        if (res.data.success || res.data.user) {
+          const userData = res.data.user || res.data;
+          setUser(userData);
+          localStorage.setItem("user", JSON.stringify(userData));
+        }
+      } catch (verifyError) {
+        // If 401, token is invalid - clear auth
+        if (verifyError.response?.status === 401) {
+          console.log("Token invalid, clearing auth...");
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setUser(null);
+        }
+        // Other errors: keep saved user if exists (offline mode)
+      }
     } catch (err) {
+      console.error("Fetch user error:", err);
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
       setUser(null);
     } finally {
       setLoading(false);
@@ -45,7 +104,15 @@ export const AuthProvider = ({ children }) => {
   /* ---------------- LOGOUT ---------------- */
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
+  };
+
+  /* ---------------- UPDATE USER (for profile changes) ---------------- */
+  const updateUser = (updatedData) => {
+    const newUser = { ...user, ...updatedData };
+    setUser(newUser);
+    localStorage.setItem("user", JSON.stringify(newUser));
   };
 
   useEffect(() => {
@@ -53,7 +120,15 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      register,
+      logout, 
+      loading,
+      updateUser,
+      refetchUser: fetchUser
+    }}>
       {children}
     </AuthContext.Provider>
   );

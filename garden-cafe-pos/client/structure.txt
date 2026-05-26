@@ -1,0 +1,91 @@
+﻿|-- src
+|   |-- assets
+|   |   |-- hero.png
+|   |   |-- react.svg
+|   |   |-- vite.svg
+|   |-- components
+|   |   |-- common
+|   |   |   |-- Toast.jsx
+|   |   |-- layoutDesigner
+|   |   |   |-- DesignerCanvas.jsx
+|   |   |   |-- GridBackground.jsx
+|   |   |   |-- PropertyPanel.jsx
+|   |   |   |-- TableNode.jsx
+|   |   |   |-- Toolbar.jsx
+|   |   |-- waiter
+|   |   |   |-- CartPanel.jsx
+|   |   |   |-- CategorySidebar.jsx
+|   |   |   |-- MenuGrid.jsx
+|   |   |   |-- TableStrip.jsx
+|   |   |   |-- WaiterTopbar.jsx
+|   |   |-- ReceiptPrint.jsx
+|   |   |-- SettlementModal.jsx
+|   |   |-- SmartCart.jsx
+|   |   |-- TicketCard.jsx
+|   |-- context
+|   |   |-- AuthContext.jsx
+|   |-- hooks
+|   |   |-- useSound.js
+|   |   |-- useToast.js
+|   |-- landing
+|   |   |-- components
+|   |   |   |-- FeatureSection.jsx
+|   |   |   |-- Footer.jsx
+|   |   |   |-- FQA.jsx
+|   |   |   |-- Hero.css
+|   |   |   |-- Hero.jsx
+|   |   |   |-- LandingNavbar.css
+|   |   |   |-- LandingNavbar.jsx
+|   |   |   |-- PricingCard.jsx
+|   |   |   |-- Testimonials.jsx
+|   |   |-- pages
+|   |   |   |-- About.jsx
+|   |   |   |-- Contact.jsx
+|   |   |   |-- Features.jsx
+|   |   |   |-- Home.jsx
+|   |   |   |-- Pricing.jsx
+|   |   |-- styles
+|   |   |   |-- landing.css
+|   |-- layouts
+|   |-- pages
+|   |   |-- admin
+|   |   |   |-- AdminDashboard.jsx
+|   |   |   |-- AdminLayoutDesigner.jsx
+|   |   |-- waiter
+|   |   |   |-- WaiterFloorPlan.jsx
+|   |   |-- KitchenKDS.jsx
+|   |   |-- login.css
+|   |   |-- Login.jsx
+|   |   |-- WaiterDashboard.jsx
+|   |   |-- WaiterTables.jsx
+|   |-- public
+|   |   |-- favicon.svg
+|   |   |-- icons.svg
+|   |-- services
+|   |   |-- api.js
+|   |   |-- socket.js
+|   |-- styles
+|   |   |-- admin.css
+|   |   |-- designer.css
+|   |   |-- glass.css
+|   |   |-- global.css
+|   |   |-- kds.css
+|   |   |-- reciept.css
+|   |   |-- settlement.css
+|   |   |-- smartCart.css
+|   |   |-- tables.css
+|   |   |-- variables.css
+|   |   |-- waiter.css
+|   |-- App.css
+|   |-- App.jsx
+|   |-- index.css
+|   |-- main.jsx
+|   |-- ProtectedRoute.jsx
+|-- .env
+|-- eslint.config.js
+|-- index.html
+|-- package-lock.json
+|-- package.json
+|-- README.md
+|-- vercel.json
+|-- vite.config.js

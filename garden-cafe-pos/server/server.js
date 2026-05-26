@@ -7,6 +7,10 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 
+const Organization = require('./models/Organization');
+const Branch = require('./models/Branch');
+const Subscription = require('./models/Subscription');
+
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorMiddleware");
 
@@ -18,21 +22,54 @@ const server = http.createServer(app);
 
 /* ---------------- ALLOWED ORIGINS ---------------- */
 const allowedOrigins = [
-  "http://localhost:5173",
+  "http://localhost:5173",      // Vite dev server
+  "http://localhost:4173",      // Vite preview default
+  "http://localhost:4174",      // Vite preview fallback
   "https://cafe-pos-system-wheat.vercel.app",
-  "https://cafe-pos-system-2ntm1803p-anjef1010s-projects.vercel.app",
 ];
 
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin
+      if (!origin) return callback(null, true);
+
+      // Allow localhost + production
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Allow ALL Vercel preview deployments
+      if (origin.includes("vercel.app")) {
+        return callback(null, true);
+      }
+
+      console.log("❌ Blocked by CORS:", origin);
+
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 /* ---------------- SOCKET.IO ---------------- */
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.includes("vercel.app")
+      ) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   },
 });
-
-app.set("io", io);
-
+app.set("io", io); 
 /* ---------------- CORS CONFIG ---------------- */
 app.use(
   cors({
@@ -82,6 +119,14 @@ app.use("/api/orders", require("./routes/orderRoutes"));
 app.use("/api/analytics", require("./routes/analyticsRoutes"));
 app.use("/api/layout", require("./routes/layoutRoutes"));
 app.use("/api/menu", require("./routes/menuRoutes"));
+app.use("/api/organization", require("./routes/organization"));
+app.use("/api/branches", require("./routes/branches"));
+app.use("/api/local-payments", require("./routes/localPayments"));
+app.use("/api/stripe", require("./routes/stripe"));
+app.use("/api/super-admin", require("./routes/superAdmin"));
+app.use("/api/billing", require("./routes/billing"));
+app.use("/api/staff", require("./routes/staff"));
+app.use("/api/public", require("./routes/publicRoutes"));  
 
 /* ---------------- HEALTH CHECK ---------------- */
 app.get("/", (req, res) => {
@@ -94,6 +139,22 @@ app.use(errorHandler);
 /* ---------------- SOCKET EVENTS ---------------- */
 io.on("connection", (socket) => {
   console.log("🔌 Client Connected:", socket.id);
+
+  // ✅ Join branch-specific room
+  socket.on("join:branch", (branchId) => {
+    if (branchId) {
+      socket.join(`branch_${branchId}`);
+      console.log(`📍 ${socket.id} joined branch_${branchId}`);
+    }
+  });
+
+  // ✅ Leave branch room
+  socket.on("leave:branch", (branchId) => {
+    if (branchId) {
+      socket.leave(`branch_${branchId}`);
+      console.log(`📤 ${socket.id} left branch_${branchId}`);
+    }
+  });
 
   socket.on("disconnect", () => {
     console.log("❌ Client Disconnected:", socket.id);

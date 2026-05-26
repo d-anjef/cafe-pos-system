@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import api from "../services/api";
-import socket from "../services/socket";
+import socket, { joinBranchRoom } from "../services/socket";
 import { useAuth } from "../context/AuthContext";
+import { useBranch } from "../context/BranchContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../hooks/useToast";
 import Toast from "../components/common/Toast";
@@ -12,6 +13,7 @@ import "../styles/waiter.css";
 
 export default function WaiterDashboard() {
   const { logout, user } = useAuth();
+  const { activeBranch } = useBranch();
   const navigate = useNavigate();
   const { toasts, showToast, removeToast } = useToast();
 
@@ -24,15 +26,18 @@ export default function WaiterDashboard() {
   const [loadingTable, setLoadingTable] = useState(false);
 
   const loadData = useCallback(async () => {
+    if (!activeBranch) return;
+
     const [tablesRes, itemsRes] = await Promise.all([
-      api.get("/tables"),
-      api.get("/menu/item")
+      api.get(`/tables?branchId=${activeBranch._id}`),
+      api.get(`/menu/item?branchId=${activeBranch._id}`)
     ]);
     setTables(tablesRes.data);
     setItems(itemsRes.data);
-  }, []);
+  }, [activeBranch]);
 
   useEffect(() => {
+    if (!activeBranch) return;
     loadData();
 
     socket.on("table:update", (updatedTable) => {
@@ -59,11 +64,20 @@ export default function WaiterDashboard() {
       socket.off("order:new");
       socket.off("order:update");
     };
-  }, [loadData]);
+  }, [loadData, activeBranch]);
+
+  useEffect(() => {
+    if (!activeBranch) return;
+    joinBranchRoom(activeBranch._id);
+  }, [activeBranch]);
 
   const loadActiveOrder = async (tableId) => {
+    if (!activeBranch) return setActiveOrder(null);
+
     try {
-      const res = await api.get(`/orders/active-by-table/${tableId}`);
+      const res = await api.get(
+        `/orders/active-by-table/${tableId}?branchId=${activeBranch._id}`
+      );
       setActiveOrder(res.data);
     } catch {
       setActiveOrder(null);
@@ -103,6 +117,7 @@ export default function WaiterDashboard() {
   };
 
   const getTableColor = (status, isSelected) => {
+    
     const colors = {
       available: "#4caf50",
       occupied: "#d4af37",
@@ -116,7 +131,20 @@ export default function WaiterDashboard() {
 
       {/* TOPBAR */}
       <div className="waiter-topbar glass-card">
-        <h3>🌿 GARDEN & CAFE</h3>
+        <h3>
+            {user?.organization?.logo ? (
+              <img
+                src={user.organization.logo}
+                 alt=""
+                  style={{ width: 24, height: 24, borderRadius: 4, verticalAlign: "middle", marginRight: 8 }}
+                  />
+                 ) : (
+                  <span style={{ marginRight: 6 }}>
+                    {user?.organization?.name?.charAt(0)?.toUpperCase() || "🌿"}
+                  </span>
+            )}
+              {user?.organization?.name?.toUpperCase() || "NUVLYX"}
+        </h3>
         <span className="waiter-date">
           {new Date().toDateString()}
         </span>
@@ -162,20 +190,26 @@ export default function WaiterDashboard() {
                 <div className="active-order-display glass-card">
                   <h4>Current Order</h4>
                   {activeOrder.items.map((item, i) => (
-                    <div key={i} className="active-order-row">
-                      <span>{item.quantity} × {item.name}</span>
-                      <span className={`item-status-badge ${item.status}`}>
-                        {item.status}
-                      </span>
-                      <span>
-                        ₹{(item.price * item.quantity).toFixed(2)}
-                      </span>
-                    </div>
+  <div key={i} className="active-order-row" style={{ flexDirection: "column", alignItems: "stretch", gap: 4 }}>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+      <span style={{ flex: 1 }}>
+        <strong>{item.quantity} × {item.displayName || item.name}</strong>
+        {item.variants && item.variants.length > 0 && (
+          <div style={{ fontSize: 11, opacity: 0.6, marginTop: 2 }}>
+            {item.variants.map(v => `${v.groupName}: ${v.optionName}`).join(" · ")}
+          </div>
+        )}
+      </span>
+      <span className={`item-status-badge ${item.status}`}>
+        {item.status}
+      </span>
+      <span>
+        NPR {(item.price * item.quantity).toFixed(2)}
+      </span>
+    </div>
+  </div>
                   ))}
-                  <div className="active-order-total">
-                    Running Total: ₹{activeOrder.totalAmount?.toFixed(2)}
                   </div>
-                </div>
               )}
 
               <MenuGrid

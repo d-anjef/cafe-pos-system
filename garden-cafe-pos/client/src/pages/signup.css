@@ -1,0 +1,103 @@
+/* ============================================================
+   NUVLYX Signup specific
+============================================================ */
+
+.nv-signup-form-area {
+  width: 100%;
+  max-width: 460px;
+}
+
+.nv-signup-progress {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 32px;
+}
+
+.nv-progress-pill {
+  flex: 1;
+  height: 4px;
+  background: var(--nv-border);
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.nv-progress-pill.nv-active {
+  background: var(--nv-gradient-gold);
+}
+
+.nv-terms {
+  text-align: center;
+  font-size: 12px;
+  color: var(--nv-text-muted);
+  margin-top: 8px;
+}
+
+/* Success */
+.nv-signup-success {
+  text-align: center;
+  padding: 24px 0;
+  animation: nv-fade-up 0.4s ease;
+}
+
+.nv-success-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--nv-success);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  animation: nv-bounce 0.6s ease;
+}
+
+.nv-signup-success h2 {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  color: var(--nv-text);
+}
+
+.nv-signup-success > p {
+  color: var(--nv-text-soft);
+  font-size: 15px;
+  margin: 0 0 28px 0;
+}
+
+.nv-signup-success strong { color: var(--nv-gold); }
+
+.nv-success-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.nv-success-list div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--nv-text-soft);
+  font-size: 14px;
+}
+
+.nv-success-list svg { color: var(--nv-success); }
+
+.nv-redirect {
+  font-size: 13px;
+  color: var(--nv-text-muted);
+  font-style: italic;
+}
+
+@keyframes nv-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes nv-bounce {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}

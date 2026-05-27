@@ -15,6 +15,15 @@ const PLAN_COLORS = {
   enterprise: "#e53935"
 };
 
+const ROLE_COLORS = {
+  owner: "#d4af37",
+  admin: "#4caf50",
+  branch_manager: "#2196f3",
+  waiter: "#9c27b0",
+  kitchen: "#ff9800",
+  super_admin: "#e53935"
+};
+
 export default function SuperAdminDashboard() {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
@@ -26,11 +35,11 @@ export default function SuperAdminDashboard() {
   };
 
   const tabs = [
-    { key: "overview",       label: "📊 Overview" },
-    { key: "organizations",  label: "🏢 Organizations" },
-    { key: "subscriptions",  label: "💳 Subscriptions" },
-    { key: "pending",        label: "⏳ Pending Upgrades" },
-    { key: "users",          label: "👥 Users" },
+    { key: "overview",      label: "📊 Overview" },
+    { key: "organizations", label: "🏢 Organizations" },
+    { key: "subscriptions", label: "💳 Subscriptions" },
+    { key: "pending",       label: "⏳ Pending Upgrades" },
+    { key: "users",         label: "👥 Users" },
   ];
 
   return (
@@ -38,7 +47,6 @@ export default function SuperAdminDashboard() {
 
       {/* SIDEBAR */}
       <div className="admin-sidebar glass-card">
-
         <div className="admin-logo">
           <span>👑</span>
           <h2>SAAS ADMIN</h2>
@@ -64,10 +72,9 @@ export default function SuperAdminDashboard() {
         <button className="sidebar-btn logout-btn" onClick={handleLogout}>
           🚪 Logout
         </button>
-
       </div>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN */}
       <div className="admin-content">
         {activeTab === "overview"      && <OverviewTab />}
         {activeTab === "organizations" && <OrganizationsTab />}
@@ -75,13 +82,12 @@ export default function SuperAdminDashboard() {
         {activeTab === "pending"       && <PendingUpgradesTab />}
         {activeTab === "users"         && <UsersTab />}
       </div>
-
     </div>
   );
 }
 
 // ============================================================
-// OVERVIEW TAB
+// OVERVIEW TAB — UNCHANGED
 // ============================================================
 function OverviewTab() {
   const [stats, setStats]   = useState(null);
@@ -115,7 +121,6 @@ function OverviewTab() {
         <small>{new Date().toDateString()}</small>
       </div>
 
-      {/* KPI CARDS */}
       <div className="kpi-grid">
         <div className="kpi-card glass-card">
           <div className="kpi-icon">🏢</div>
@@ -124,7 +129,6 @@ function OverviewTab() {
             <h2>{stats.totalOrganizations}</h2>
           </div>
         </div>
-
         <div className="kpi-card glass-card">
           <div className="kpi-icon">👥</div>
           <div className="kpi-info">
@@ -132,7 +136,6 @@ function OverviewTab() {
             <h2>{stats.totalUsers}</h2>
           </div>
         </div>
-
         <div className="kpi-card glass-card">
           <div className="kpi-icon">💳</div>
           <div className="kpi-info">
@@ -140,7 +143,6 @@ function OverviewTab() {
             <h2>{stats.activeSubscriptions}</h2>
           </div>
         </div>
-
         <div className="kpi-card glass-card">
           <div className="kpi-icon">💰</div>
           <div className="kpi-info">
@@ -150,10 +152,7 @@ function OverviewTab() {
         </div>
       </div>
 
-      {/* CHARTS */}
       <div className="charts-grid">
-
-        {/* Plan Distribution */}
         <div className="chart-card glass-card">
           <h3>Plan Distribution</h3>
           {planData.length === 0 ? (
@@ -161,20 +160,10 @@ function OverviewTab() {
           ) : (
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
-                <Pie
-                  data={planData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  label={({ name, value }) => `${name}: ${value}`}
-                >
+                <Pie data={planData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}
+                  label={({ name, value }) => `${name}: ${value}`}>
                   {planData.map((entry, index) => (
-                    <Cell
-                      key={index}
-                      fill={PLAN_COLORS[entry.name] || "#888"}
-                    />
+                    <Cell key={index} fill={PLAN_COLORS[entry.name] || "#888"} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -183,7 +172,6 @@ function OverviewTab() {
           )}
         </div>
 
-        {/* New Orgs Chart */}
         <div className="chart-card glass-card">
           <h3>New Organizations (Last 7 Days)</h3>
           {!stats.newOrgsChart?.length ? (
@@ -199,10 +187,8 @@ function OverviewTab() {
             </ResponsiveContainer>
           )}
         </div>
-
       </div>
 
-      {/* RECENT ORGANIZATIONS */}
       <div className="glass-card" style={{ padding: 24 }}>
         <h3 style={{ marginBottom: 16 }}>Recent Organizations</h3>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -217,30 +203,20 @@ function OverviewTab() {
           </thead>
           <tbody>
             {(stats.recentOrgs || []).map(org => (
-              <tr
-                key={org._id}
-                style={{ borderBottom: "1px solid var(--border-soft)" }}
-              >
+              <tr key={org._id} style={{ borderBottom: "1px solid var(--border-soft)" }}>
                 <td style={{ padding: "10px 12px", fontWeight: 600 }}>{org.name}</td>
                 <td style={{ padding: "10px 12px", opacity: 0.8 }}>{org.owner?.name || "—"}</td>
                 <td style={{ padding: "10px 12px" }}>
                   <span style={{
                     background: PLAN_COLORS[org.subscription?.plan] + "22",
                     color: PLAN_COLORS[org.subscription?.plan],
-                    padding: "2px 10px",
-                    borderRadius: 20,
-                    fontSize: 12,
-                    fontWeight: 600
+                    padding: "2px 10px", borderRadius: 20, fontSize: 12, fontWeight: 600
                   }}>
                     {org.subscription?.plan || "free"}
                   </span>
                 </td>
                 <td style={{ padding: "10px 12px" }}>
-                  <span style={{
-                    color: org.isActive ? "#4caf50" : "#e53935",
-                    fontWeight: 600,
-                    fontSize: 12
-                  }}>
+                  <span style={{ color: org.isActive ? "#4caf50" : "#e53935", fontWeight: 600, fontSize: 12 }}>
                     {org.isActive ? "Active" : "Inactive"}
                   </span>
                 </td>
@@ -252,12 +228,12 @@ function OverviewTab() {
           </tbody>
         </table>
       </div>
-
     </div>
   );
 }
+
 // ============================================================
-// PENDING UPGRADES TAB
+// PENDING UPGRADES TAB — UPDATED reject prompt (now requires reason)
 // ============================================================
 function PendingUpgradesTab() {
   const [pending, setPending] = useState([]);
@@ -279,11 +255,11 @@ function PendingUpgradesTab() {
   useEffect(() => { loadPending(); }, []);
 
   const handleApprove = async (subId, orgName) => {
-    if (!window.confirm(`Approve upgrade for ${orgName}?`)) return;
+    if (!window.confirm(`Approve upgrade for ${orgName}? An email will be sent to the owner.`)) return;
     setProcessing(subId);
     try {
       await api.post(`/billing/approve-upgrade/${subId}`);
-      alert("✅ Upgrade approved and activated!");
+      alert("✅ Upgrade approved! Owner has been notified by email.");
       loadPending();
     } catch (err) {
       alert(err.response?.data?.message || "Failed to approve");
@@ -293,12 +269,18 @@ function PendingUpgradesTab() {
   };
 
   const handleReject = async (subId, orgName) => {
-    const reason = window.prompt(`Reject upgrade for ${orgName}? Enter reason:`);
+    const reason = window.prompt(
+      `Reject upgrade for ${orgName}?\n\nPlease provide a reason (min 10 chars). The owner will receive this in an email:`
+    );
     if (!reason) return;
+    if (reason.trim().length < 10) {
+      alert("Reason must be at least 10 characters");
+      return;
+    }
     setProcessing(subId);
     try {
-      await api.post(`/billing/reject-upgrade/${subId}`, { reason });
-      alert("Upgrade rejected");
+      await api.post(`/billing/reject-upgrade/${subId}`, { reason: reason.trim() });
+      alert("Upgrade rejected. Owner has been notified by email.");
       loadPending();
     } catch (err) {
       alert(err.response?.data?.message || "Failed to reject");
@@ -328,8 +310,6 @@ function PendingUpgradesTab() {
             const up = sub.pendingUpgrade;
             return (
               <div key={sub._id} className="glass-card" style={{ padding: 24 }}>
-
-                {/* HEADER */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
                   <div>
                     <h3 style={{ margin: 0 }}>{sub.organization?.name || "Unknown Org"}</h3>
@@ -340,28 +320,17 @@ function PendingUpgradesTab() {
                       {new Date(up.requestedAt).toLocaleString()}
                     </div>
                   </div>
-
                   <span style={{
-                    background: "#d4af3722",
-                    color: "#d4af37",
-                    padding: "6px 14px",
-                    borderRadius: 20,
-                    fontSize: 13,
-                    fontWeight: 700
+                    background: "#d4af3722", color: "#d4af37",
+                    padding: "6px 14px", borderRadius: 20, fontSize: 13, fontWeight: 700
                   }}>
                     ⏳ PENDING
                   </span>
                 </div>
 
-                {/* DETAILS GRID */}
                 <div style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-                  gap: 14,
-                  padding: 16,
-                  background: "var(--bg-sidebar)",
-                  borderRadius: 10,
-                  marginBottom: 16
+                  display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                  gap: 14, padding: 16, background: "var(--bg-sidebar)", borderRadius: 10, marginBottom: 16
                 }}>
                   <div>
                     <div style={{ opacity: 0.6, fontSize: 12 }}>Requested Plan</div>
@@ -385,40 +354,29 @@ function PendingUpgradesTab() {
                   </div>
                 </div>
 
-                {/* TRANSACTION REF */}
                 <div style={{ marginBottom: 12 }}>
                   <div style={{ opacity: 0.6, fontSize: 12, marginBottom: 4 }}>Transaction Reference</div>
                   <code style={{
-                    background: "rgba(255,255,255,0.05)",
-                    padding: "6px 12px",
-                    borderRadius: 6,
-                    fontSize: 13,
-                    display: "inline-block"
+                    background: "rgba(255,255,255,0.05)", padding: "6px 12px",
+                    borderRadius: 6, fontSize: 13, display: "inline-block"
                   }}>
                     {up.transactionRef || "—"}
                   </code>
                 </div>
 
-                {/* NOTES */}
                 {up.notes && (
                   <div style={{ marginBottom: 16, padding: 12, background: "rgba(255,255,255,0.03)", borderRadius: 8, fontSize: 13 }}>
                     <strong>Notes:</strong> {up.notes}
                   </div>
                 )}
 
-                {/* ACTIONS */}
                 <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
                   <button
                     onClick={() => handleReject(sub._id, sub.organization?.name)}
                     disabled={processing === sub._id}
                     style={{
-                      padding: "10px 20px",
-                      borderRadius: 8,
-                      border: "none",
-                      background: "#e5393522",
-                      color: "#e53935",
-                      cursor: "pointer",
-                      fontWeight: 600
+                      padding: "10px 20px", borderRadius: 8, border: "none",
+                      background: "#e5393522", color: "#e53935", cursor: "pointer", fontWeight: 600
                     }}
                   >
                     ❌ Reject
@@ -427,19 +385,13 @@ function PendingUpgradesTab() {
                     onClick={() => handleApprove(sub._id, sub.organization?.name)}
                     disabled={processing === sub._id}
                     style={{
-                      padding: "10px 20px",
-                      borderRadius: 8,
-                      border: "none",
-                      background: "#4caf50",
-                      color: "#fff",
-                      cursor: "pointer",
-                      fontWeight: 700
+                      padding: "10px 20px", borderRadius: 8, border: "none",
+                      background: "#4caf50", color: "#fff", cursor: "pointer", fontWeight: 700
                     }}
                   >
                     {processing === sub._id ? "Processing..." : "✅ Approve & Activate"}
                   </button>
                 </div>
-
               </div>
             );
           })}
@@ -448,13 +400,15 @@ function PendingUpgradesTab() {
     </div>
   );
 }
+
 // ============================================================
-// ORGANIZATIONS TAB
+// ORGANIZATIONS TAB — UPDATED with Delete button
 // ============================================================
 function OrganizationsTab() {
   const [orgs, setOrgs]       = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState("");
+  const [deleteOrg, setDeleteOrg] = useState(null);
 
   const loadOrgs = async () => {
     try {
@@ -472,11 +426,9 @@ function OrganizationsTab() {
 
   const handleToggleActive = async (orgId, current) => {
     try {
-      await api.put(`/super-admin/organizations/${orgId}`, {
-        isActive: !current
-      });
+      await api.put(`/super-admin/organizations/${orgId}`, { isActive: !current });
       loadOrgs();
-    } catch (err) {
+    } catch {
       alert("Failed to update organization");
     }
   };
@@ -485,7 +437,7 @@ function OrganizationsTab() {
     try {
       await api.put(`/super-admin/organizations/${orgId}/plan`, { plan });
       loadOrgs();
-    } catch (err) {
+    } catch {
       alert("Failed to update plan");
     }
   };
@@ -504,54 +456,42 @@ function OrganizationsTab() {
         <span>{orgs.length} total</span>
       </div>
 
-      {/* SEARCH */}
       <div className="glass-card" style={{ padding: 16, marginBottom: 16 }}>
         <input
           placeholder="🔍 Search by name or owner email..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           style={{
-            width: "100%",
-            padding: "10px 16px",
-            borderRadius: 10,
-            border: "1px solid var(--border-soft)",
-            background: "var(--bg-card)",
-            color: "var(--text-primary)",
-            fontSize: 14
+            width: "100%", padding: "10px 16px", borderRadius: 10,
+            border: "1px solid var(--border-soft)", background: "var(--bg-card)",
+            color: "var(--text-primary)", fontSize: 14
           }}
         />
       </div>
 
-      {/* ORG LIST */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {filtered.map(org => (
           <div key={org._id} className="glass-card" style={{ padding: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
 
-              {/* LEFT INFO */}
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
                   <h3 style={{ margin: 0 }}>{org.name}</h3>
                   <span style={{
                     background: PLAN_COLORS[org.subscription?.plan] + "22",
                     color: PLAN_COLORS[org.subscription?.plan],
-                    padding: "2px 10px",
-                    borderRadius: 20,
-                    fontSize: 11,
-                    fontWeight: 700
+                    padding: "2px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700
                   }}>
                     {org.subscription?.plan?.toUpperCase() || "FREE"}
                   </span>
                   <span style={{
-                    color: org.isActive ? "#4caf50" : "#e53935",
-                    fontSize: 12,
-                    fontWeight: 600
+                    color: org.isActive ? "#4caf50" : "#e53935", fontSize: 12, fontWeight: 600
                   }}>
                     {org.isActive ? "● Active" : "● Inactive"}
                   </span>
                 </div>
 
-                <div style={{ display: "flex", gap: 20, opacity: 0.7, fontSize: 13 }}>
+                <div style={{ display: "flex", gap: 20, opacity: 0.7, fontSize: 13, flexWrap: "wrap" }}>
                   <span>👤 {org.owner?.name || "—"}</span>
                   <span>📧 {org.owner?.email || "—"}</span>
                   <span>🏪 {org.branchCount || 0} branches</span>
@@ -560,21 +500,14 @@ function OrganizationsTab() {
                 </div>
               </div>
 
-              {/* RIGHT ACTIONS */}
               <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-
-                {/* PLAN SELECTOR */}
                 <select
                   value={org.subscription?.plan || "free"}
                   onChange={e => handleChangePlan(org._id, e.target.value)}
                   style={{
-                    padding: "6px 12px",
-                    borderRadius: 8,
-                    border: "1px solid var(--border-soft)",
-                    background: "var(--bg-card)",
-                    color: "var(--text-primary)",
-                    fontSize: 13,
-                    cursor: "pointer"
+                    padding: "6px 12px", borderRadius: 8, border: "1px solid var(--border-soft)",
+                    background: "var(--bg-card)", color: "var(--text-primary)",
+                    fontSize: 13, cursor: "pointer"
                   }}
                 >
                   <option value="free">Free</option>
@@ -583,23 +516,35 @@ function OrganizationsTab() {
                   <option value="enterprise">Enterprise</option>
                 </select>
 
-                {/* TOGGLE ACTIVE */}
                 <button
                   onClick={() => handleToggleActive(org._id, org.isActive)}
                   style={{
-                    padding: "6px 14px",
-                    borderRadius: 8,
-                    border: "none",
+                    padding: "6px 14px", borderRadius: 8, border: "none",
                     background: org.isActive ? "#e5393522" : "#4caf5022",
                     color: org.isActive ? "#e53935" : "#4caf50",
-                    cursor: "pointer",
-                    fontWeight: 600,
-                    fontSize: 13
+                    cursor: "pointer", fontWeight: 600, fontSize: 13
                   }}
                 >
                   {org.isActive ? "Deactivate" : "Activate"}
                 </button>
 
+                {/* ✅ NEW: DELETE BUTTON */}
+                <button
+                  onClick={() => setDeleteOrg(org)}
+                  title="Permanently delete organization"
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: 8,
+                    border: "1px solid rgba(229,57,53,0.4)",
+                    background: "rgba(229,57,53,0.08)",
+                    color: "#e53935",
+                    cursor: "pointer",
+                    fontWeight: 700,
+                    fontSize: 13
+                  }}
+                >
+                  🗑️ Delete
+                </button>
               </div>
             </div>
           </div>
@@ -609,12 +554,290 @@ function OrganizationsTab() {
           <div className="tab-empty">No organizations found</div>
         )}
       </div>
+
+      {/* DELETE MODAL */}
+      {deleteOrg && (
+        <DeleteOrgModal
+          org={deleteOrg}
+          onClose={() => setDeleteOrg(null)}
+          onSuccess={() => {
+            setDeleteOrg(null);
+            loadOrgs();
+          }}
+        />
+      )}
     </div>
   );
 }
 
 // ============================================================
-// SUBSCRIPTIONS TAB
+// DELETE ORGANIZATION MODAL
+// ============================================================
+function DeleteOrgModal({ org, onClose, onSuccess }) {
+  const [preview, setPreview]       = useState(null);
+  const [loading, setLoading]       = useState(true);
+  const [confirmation, setConfirmation] = useState("");
+  const [reason, setReason]         = useState("");
+  const [deleting, setDeleting]     = useState(false);
+  const [error, setError]           = useState("");
+
+  // Fetch what will be deleted
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await api.get(`/super-admin/organizations/${org._id}/delete-preview`);
+        setPreview(res.data.preview);
+      } catch (err) {
+        setError("Failed to load delete preview");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [org._id]);
+
+  const handleDelete = async () => {
+    if (confirmation !== org.name) {
+      setError(`Type "${org.name}" exactly to confirm`);
+      return;
+    }
+
+    setDeleting(true);
+    setError("");
+
+    try {
+      const res = await api.delete(`/super-admin/organizations/${org._id}`, {
+        data: { confirmation, reason: reason.trim() }
+      });
+
+      alert(
+        `✅ Organization deleted!\n\n` +
+        `${res.data.deletionStats.users} users, ` +
+        `${res.data.deletionStats.branches} branches, ` +
+        `${res.data.deletionStats.orders} orders removed.\n\n` +
+        (res.data.emailSent ? "Owner notified by email." : "")
+      );
+
+      onSuccess();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to delete");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const matches = confirmation === org.name;
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0,
+        background: "rgba(0,0,0,0.7)",
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20,
+        backdropFilter: "blur(4px)"
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="glass-card"
+        style={{
+          maxWidth: 520,
+          width: "100%",
+          maxHeight: "90vh",
+          overflowY: "auto",
+          padding: 28
+        }}
+      >
+        {/* HEADER */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+          <div style={{
+            width: 48, height: 48,
+            background: "rgba(229,57,53,0.15)",
+            border: "1px solid #e53935",
+            borderRadius: 12,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 24
+          }}>
+            ⚠️
+          </div>
+          <div>
+            <h2 style={{ margin: 0, color: "#e53935" }}>Delete Organization</h2>
+            <p style={{ margin: "4px 0 0", opacity: 0.6, fontSize: 13 }}>
+              This action is permanent and cannot be undone
+            </p>
+          </div>
+        </div>
+
+        {loading ? (
+          <div style={{ padding: 40, textAlign: "center", opacity: 0.6 }}>
+            Loading preview...
+          </div>
+        ) : (
+          <>
+            {/* WHAT WILL BE DELETED */}
+            <div style={{
+              background: "rgba(229,57,53,0.05)",
+              border: "1px solid rgba(229,57,53,0.2)",
+              borderRadius: 12,
+              padding: 16,
+              marginBottom: 20
+            }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#e53935", marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>
+                The following will be permanently deleted:
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 13 }}>
+                <DeletionRow label="Organization" value="1" />
+                <DeletionRow label="Owner" value={preview?.ownerName || "—"} />
+                <DeletionRow label="Users" value={preview?.counts?.users || 0} />
+                <DeletionRow label="Branches" value={preview?.counts?.branches || 0} />
+                <DeletionRow label="Menu Items" value={preview?.counts?.menuItems || 0} />
+                <DeletionRow label="Categories" value={preview?.counts?.categories || 0} />
+                <DeletionRow label="Tables" value={preview?.counts?.tables || 0} />
+                <DeletionRow label="Orders" value={preview?.counts?.orders || 0} />
+              </div>
+            </div>
+
+            {/* REASON (optional) */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontSize: 13, opacity: 0.7, marginBottom: 6, fontWeight: 600 }}>
+                Reason for deletion (optional)
+              </label>
+              <textarea
+                value={reason}
+                onChange={e => setReason(e.target.value)}
+                placeholder="e.g. Customer requested account closure, fraudulent activity, etc."
+                rows={2}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                  border: "1px solid var(--border-soft)",
+                  background: "var(--bg-card)",
+                  color: "var(--text-primary)",
+                  fontSize: 13,
+                  resize: "vertical",
+                  fontFamily: "inherit"
+                }}
+              />
+              <p style={{ fontSize: 11, opacity: 0.5, marginTop: 4 }}>
+                This will be included in the email to the owner
+              </p>
+            </div>
+
+            {/* CONFIRMATION INPUT */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontSize: 13, opacity: 0.7, marginBottom: 6, fontWeight: 600 }}>
+                Type <code style={{
+                  background: "rgba(229,57,53,0.15)",
+                  color: "#e53935",
+                  padding: "2px 8px",
+                  borderRadius: 4,
+                  fontWeight: 700
+                }}>{org.name}</code> to confirm
+              </label>
+              <input
+                type="text"
+                value={confirmation}
+                onChange={e => setConfirmation(e.target.value)}
+                placeholder={`Type "${org.name}" here`}
+                autoFocus
+                style={{
+                  width: "100%",
+                  padding: "12px 14px",
+                  borderRadius: 8,
+                  border: matches
+                    ? "2px solid #4caf50"
+                    : "1px solid var(--border-soft)",
+                  background: "var(--bg-card)",
+                  color: "var(--text-primary)",
+                  fontSize: 14,
+                  fontFamily: "monospace"
+                }}
+              />
+            </div>
+
+            {/* ERROR */}
+            {error && (
+              <div style={{
+                background: "rgba(229,57,53,0.1)",
+                border: "1px solid rgba(229,57,53,0.3)",
+                color: "#e53935",
+                padding: "10px 14px",
+                borderRadius: 8,
+                fontSize: 13,
+                marginBottom: 16
+              }}>
+                ⚠️ {error}
+              </div>
+            )}
+
+            {/* ACTIONS */}
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={onClose}
+                disabled={deleting}
+                style={{
+                  flex: 1,
+                  padding: 12,
+                  borderRadius: 10,
+                  border: "1px solid var(--border-soft)",
+                  background: "transparent",
+                  color: "var(--text-primary)",
+                  cursor: "pointer",
+                  fontWeight: 600
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={!matches || deleting}
+                style={{
+                  flex: 2,
+                  padding: 12,
+                  borderRadius: 10,
+                  border: "none",
+                  background: matches ? "#e53935" : "rgba(229,57,53,0.3)",
+                  color: "white",
+                  cursor: (matches && !deleting) ? "pointer" : "not-allowed",
+                  fontWeight: 700,
+                  opacity: deleting ? 0.6 : 1
+                }}
+              >
+                {deleting ? "Deleting..." : "🗑️ Permanently Delete"}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DeletionRow({ label, value }) {
+  return (
+    <div style={{
+      display: "flex",
+      justifyContent: "space-between",
+      padding: "4px 0",
+      borderBottom: "1px solid rgba(255,255,255,0.05)"
+    }}>
+      <span style={{ opacity: 0.7 }}>{label}:</span>
+      <strong style={{ color: "#e53935" }}>{value}</strong>
+    </div>
+  );
+}
+
+// ============================================================
+// SUBSCRIPTIONS TAB — UNCHANGED
 // ============================================================
 function SubscriptionsTab() {
   const [subs, setSubs]       = useState([]);
@@ -625,8 +848,7 @@ function SubscriptionsTab() {
       try {
         const res = await api.get("/super-admin/subscriptions");
         setSubs(res.data.subscriptions || []);
-      } catch (err) {
-        console.error(err);
+      } catch {
       } finally {
         setLoading(false);
       }
@@ -647,28 +869,18 @@ function SubscriptionsTab() {
         <span>{subs.length} total</span>
       </div>
 
-      {/* KPI */}
       <div className="kpi-grid">
         <div className="kpi-card glass-card">
           <div className="kpi-icon">✅</div>
-          <div className="kpi-info">
-            <h4>Active</h4>
-            <h2>{active}</h2>
-          </div>
+          <div className="kpi-info"><h4>Active</h4><h2>{active}</h2></div>
         </div>
         <div className="kpi-card glass-card">
           <div className="kpi-icon">🔔</div>
-          <div className="kpi-info">
-            <h4>Trialing</h4>
-            <h2>{trialing}</h2>
-          </div>
+          <div className="kpi-info"><h4>Trialing</h4><h2>{trialing}</h2></div>
         </div>
         <div className="kpi-card glass-card">
           <div className="kpi-icon">⚠️</div>
-          <div className="kpi-info">
-            <h4>Past Due</h4>
-            <h2>{pastDue}</h2>
-          </div>
+          <div className="kpi-info"><h4>Past Due</h4><h2>{pastDue}</h2></div>
         </div>
         <div className="kpi-card glass-card">
           <div className="kpi-icon">💰</div>
@@ -679,7 +891,6 @@ function SubscriptionsTab() {
         </div>
       </div>
 
-      {/* SUBSCRIPTION LIST */}
       <div className="glass-card" style={{ padding: 0, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
@@ -692,17 +903,12 @@ function SubscriptionsTab() {
           <tbody>
             {subs.map(sub => (
               <tr key={sub._id} style={{ borderBottom: "1px solid var(--border-soft)" }}>
-                <td style={{ padding: "12px 16px", fontWeight: 600 }}>
-                  {sub.organization?.name || "—"}
-                </td>
+                <td style={{ padding: "12px 16px", fontWeight: 600 }}>{sub.organization?.name || "—"}</td>
                 <td style={{ padding: "12px 16px" }}>
                   <span style={{
                     background: PLAN_COLORS[sub.plan] + "22",
                     color: PLAN_COLORS[sub.plan],
-                    padding: "2px 10px",
-                    borderRadius: 20,
-                    fontSize: 12,
-                    fontWeight: 600
+                    padding: "2px 10px", borderRadius: 20, fontSize: 12, fontWeight: 600
                   }}>
                     {sub.plan}
                   </span>
@@ -712,49 +918,41 @@ function SubscriptionsTab() {
                     color: sub.status === "active" ? "#4caf50"
                          : sub.status === "trialing" ? "#d4af37"
                          : "#e53935",
-                    fontWeight: 600,
-                    fontSize: 12
+                    fontWeight: 600, fontSize: 12
                   }}>
                     {sub.status}
                   </span>
                 </td>
-                <td style={{ padding: "12px 16px" }}>
-                  NPR {sub.amount?.toLocaleString()}
-                </td>
-                <td style={{ padding: "12px 16px", opacity: 0.7, fontSize: 13 }}>
-                  {sub.provider}
-                </td>
+                <td style={{ padding: "12px 16px" }}>NPR {sub.amount?.toLocaleString()}</td>
+                <td style={{ padding: "12px 16px", opacity: 0.7, fontSize: 13 }}>{sub.provider}</td>
                 <td style={{ padding: "12px 16px", opacity: 0.7, fontSize: 12 }}>
-                  {sub.currentPeriodEnd
-                    ? new Date(sub.currentPeriodEnd).toLocaleDateString()
-                    : "—"}
+                  {sub.currentPeriodEnd ? new Date(sub.currentPeriodEnd).toLocaleDateString() : "—"}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
     </div>
   );
 }
 
 // ============================================================
-// USERS TAB
+// USERS TAB — ✅ REBUILT with collapsible groups by org
 // ============================================================
 function UsersTab() {
   const [users, setUsers]     = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [expandedOrgs, setExpandedOrgs] = useState({});
 
   const loadUsers = async () => {
     try {
       setLoading(true);
       const res = await api.get("/super-admin/users");
       setUsers(res.data.users || []);
-    } catch (err) {
-      console.error(err);
+    } catch {
     } finally {
       setLoading(false);
     }
@@ -766,13 +964,12 @@ function UsersTab() {
     try {
       await api.put(`/super-admin/users/${userId}`, { isActive: !current });
       loadUsers();
-    } catch (err) {
+    } catch {
       alert("Failed to update user");
     }
   };
 
-  const roles = ["all", "owner", "admin", "branch_manager", "waiter", "kitchen"];
-
+  // Filter users
   const filtered = users.filter(u => {
     const matchRole   = roleFilter === "all" || u.role === roleFilter;
     const matchSearch = u.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -780,14 +977,56 @@ function UsersTab() {
     return matchRole && matchSearch;
   });
 
-  const ROLE_COLORS = {
-    owner: "#d4af37",
-    admin: "#4caf50",
-    branch_manager: "#2196f3",
-    waiter: "#9c27b0",
-    kitchen: "#ff9800",
-    super_admin: "#e53935"
+  // Group by organization
+  const grouped = {};
+  filtered.forEach(u => {
+    const orgKey = u.organization?._id || "no-org";
+    const orgName = u.organization?.name || "No Organization";
+
+    if (!grouped[orgKey]) {
+      grouped[orgKey] = {
+        orgId: orgKey,
+        orgName,
+        users: []
+      };
+    }
+    grouped[orgKey].users.push(u);
+  });
+
+  const groupArray = Object.values(grouped);
+
+  // Sort groups: orgs with owner first, "No Organization" last
+  groupArray.sort((a, b) => {
+    if (a.orgId === "no-org") return 1;
+    if (b.orgId === "no-org") return -1;
+    return a.orgName.localeCompare(b.orgName);
+  });
+
+  // Auto-expand first group (or restore previous state)
+  useEffect(() => {
+    if (groupArray.length > 0 && Object.keys(expandedOrgs).length === 0) {
+      const initial = {};
+      initial[groupArray[0].orgId] = true;
+      setExpandedOrgs(initial);
+    }
+    // eslint-disable-next-line
+  }, [groupArray.length]);
+
+  const toggleOrg = (orgId) => {
+    setExpandedOrgs(prev => ({ ...prev, [orgId]: !prev[orgId] }));
   };
+
+  const expandAll = () => {
+    const all = {};
+    groupArray.forEach(g => all[g.orgId] = true);
+    setExpandedOrgs(all);
+  };
+
+  const collapseAll = () => {
+    setExpandedOrgs({});
+  };
+
+  const roles = ["all", "owner", "admin", "branch_manager", "waiter", "kitchen"];
 
   if (loading) return <div className="tab-loading">Loading users...</div>;
 
@@ -795,7 +1034,7 @@ function UsersTab() {
     <div className="admin-tab">
       <div className="tab-header">
         <h2>All Users</h2>
-        <span>{users.length} total</span>
+        <span>{users.length} users · {groupArray.length} organizations</span>
       </div>
 
       {/* FILTERS */}
@@ -805,27 +1044,17 @@ function UsersTab() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           style={{
-            flex: 1,
-            minWidth: 200,
-            padding: "10px 16px",
-            borderRadius: 10,
-            border: "1px solid var(--border-soft)",
-            background: "var(--bg-card)",
-            color: "var(--text-primary)",
-            fontSize: 14
+            flex: 1, minWidth: 200, padding: "10px 16px", borderRadius: 10,
+            border: "1px solid var(--border-soft)", background: "var(--bg-card)",
+            color: "var(--text-primary)", fontSize: 14
           }}
         />
         <select
           value={roleFilter}
           onChange={e => setRoleFilter(e.target.value)}
           style={{
-            padding: "10px 16px",
-            borderRadius: 10,
-            border: "1px solid var(--border-soft)",
-            background: "var(--bg-card)",
-            color: "var(--text-primary)",
-            fontSize: 14,
-            cursor: "pointer"
+            padding: "10px 16px", borderRadius: 10, border: "1px solid var(--border-soft)",
+            background: "var(--bg-card)", color: "var(--text-primary)", fontSize: 14, cursor: "pointer"
           }}
         >
           {roles.map(r => (
@@ -834,84 +1063,188 @@ function UsersTab() {
             </option>
           ))}
         </select>
+
+        {/* EXPAND/COLLAPSE BUTTONS */}
+        <button
+          onClick={expandAll}
+          style={{
+            padding: "10px 14px",
+            borderRadius: 10,
+            border: "1px solid var(--border-soft)",
+            background: "var(--bg-card)",
+            color: "var(--text-primary)",
+            cursor: "pointer",
+            fontSize: 13,
+            fontWeight: 600
+          }}
+        >
+          Expand all
+        </button>
+        <button
+          onClick={collapseAll}
+          style={{
+            padding: "10px 14px",
+            borderRadius: 10,
+            border: "1px solid var(--border-soft)",
+            background: "var(--bg-card)",
+            color: "var(--text-primary)",
+            cursor: "pointer",
+            fontSize: 13,
+            fontWeight: 600
+          }}
+        >
+          Collapse all
+        </button>
       </div>
 
-      {/* USER LIST */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {filtered.map(u => (
-          <div
-            key={u._id}
-            className="glass-card"
-            style={{ padding: "14px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{
-                width: 40, height: 40,
-                borderRadius: "50%",
-                background: ROLE_COLORS[u.role] + "33",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 18
-              }}>
-                {u.role === "owner" ? "🏢"
-                 : u.role === "admin" ? "⚙️"
-                 : u.role === "branch_manager" ? "📋"
-                 : u.role === "waiter" ? "🍽️"
-                 : u.role === "kitchen" ? "👨‍🍳"
-                 : "👑"}
-              </div>
-              <div>
-                <div style={{ fontWeight: 600, marginBottom: 2 }}>{u.name}</div>
-                <div style={{ fontSize: 13, opacity: 0.7 }}>{u.email}</div>
-                <div style={{ fontSize: 12, opacity: 0.5 }}>
-                  {u.organization?.name || "No Organization"}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{
-                background: ROLE_COLORS[u.role] + "22",
-                color: ROLE_COLORS[u.role],
-                padding: "3px 10px",
-                borderRadius: 20,
-                fontSize: 12,
-                fontWeight: 600
-              }}>
-                {u.role.replace("_", " ")}
-              </span>
-
-              <span style={{
-                color: u.isActive ? "#4caf50" : "#e53935",
-                fontSize: 12,
-                fontWeight: 600
-              }}>
-                {u.isActive ? "● Active" : "● Inactive"}
-              </span>
-
-              <button
-                onClick={() => handleToggleUser(u._id, u.isActive)}
-                style={{
-                  padding: "5px 12px",
-                  borderRadius: 8,
-                  border: "none",
-                  background: u.isActive ? "#e5393522" : "#4caf5022",
-                  color: u.isActive ? "#e53935" : "#4caf50",
-                  cursor: "pointer",
-                  fontWeight: 600,
-                  fontSize: 12
-                }}
-              >
-                {u.isActive ? "Deactivate" : "Activate"}
-              </button>
-            </div>
-          </div>
-        ))}
-
-        {filtered.length === 0 && (
+      {/* GROUPED USER LIST */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {groupArray.length === 0 ? (
           <div className="tab-empty">No users found</div>
+        ) : (
+          groupArray.map(group => {
+            const expanded = expandedOrgs[group.orgId];
+            const owners = group.users.filter(u => u.role === "owner");
+            const isNoOrg = group.orgId === "no-org";
+
+            return (
+              <div key={group.orgId} className="glass-card" style={{ padding: 0, overflow: "hidden" }}>
+
+                {/* GROUP HEADER */}
+                <div
+                  onClick={() => toggleOrg(group.orgId)}
+                  style={{
+                    padding: "14px 20px",
+                    cursor: "pointer",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    background: expanded ? "rgba(212,175,55,0.05)" : "transparent",
+                    borderBottom: expanded ? "1px solid var(--border-soft)" : "none",
+                    transition: "background 0.2s"
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <span style={{
+                      fontSize: 14,
+                      color: "#d4af37",
+                      transform: expanded ? "rotate(90deg)" : "rotate(0deg)",
+                      transition: "transform 0.2s"
+                    }}>
+                      ▶
+                    </span>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", gap: 8 }}>
+                        {isNoOrg ? "🌐" : "🏢"} {group.orgName}
+                      </div>
+                      {owners.length > 0 && (
+                        <div style={{ fontSize: 12, opacity: 0.6, marginTop: 2 }}>
+                          Owner: {owners[0].name} ({owners[0].email})
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <span style={{
+                      background: "rgba(212,175,55,0.15)",
+                      color: "#d4af37",
+                      padding: "4px 12px",
+                      borderRadius: 20,
+                      fontSize: 12,
+                      fontWeight: 700
+                    }}>
+                      {group.users.length} user{group.users.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                </div>
+
+                {/* GROUP USERS */}
+                {expanded && (
+                  <div style={{ padding: 8 }}>
+                    {group.users.map(u => (
+                      <div
+                        key={u._id}
+                        style={{
+                          padding: "12px 16px",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                          gap: 10,
+                          borderRadius: 8,
+                          transition: "background 0.15s"
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.03)"}
+                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                          <div style={{
+                            width: 38, height: 38,
+                            borderRadius: "50%",
+                            background: ROLE_COLORS[u.role] + "33",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: 16
+                          }}>
+                            {u.role === "owner" ? "🏢"
+                             : u.role === "admin" ? "⚙️"
+                             : u.role === "branch_manager" ? "📋"
+                             : u.role === "waiter" ? "🍽️"
+                             : u.role === "kitchen" ? "👨‍🍳"
+                             : "👑"}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 600, marginBottom: 2 }}>{u.name}</div>
+                            <div style={{ fontSize: 12, opacity: 0.7 }}>{u.email}</div>
+                          </div>
+                        </div>
+
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <span style={{
+                            background: ROLE_COLORS[u.role] + "22",
+                            color: ROLE_COLORS[u.role],
+                            padding: "3px 10px",
+                            borderRadius: 20,
+                            fontSize: 11,
+                            fontWeight: 600,
+                            textTransform: "capitalize"
+                          }}>
+                            {u.role.replace("_", " ")}
+                          </span>
+
+                          <span style={{
+                            color: u.isActive ? "#4caf50" : "#e53935",
+                            fontSize: 11,
+                            fontWeight: 600
+                          }}>
+                            {u.isActive ? "● Active" : "● Inactive"}
+                          </span>
+
+                          <button
+                            onClick={() => handleToggleUser(u._id, u.isActive)}
+                            style={{
+                              padding: "5px 10px",
+                              borderRadius: 6,
+                              border: "none",
+                              background: u.isActive ? "#e5393522" : "#4caf5022",
+                              color: u.isActive ? "#e53935" : "#4caf50",
+                              cursor: "pointer",
+                              fontWeight: 600,
+                              fontSize: 11
+                            }}
+                          >
+                            {u.isActive ? "Deactivate" : "Activate"}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
-
     </div>
   );
 }

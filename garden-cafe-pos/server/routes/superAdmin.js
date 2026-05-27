@@ -6,9 +6,16 @@ const Organization = require("../models/Organization");
 const User = require("../models/User");
 const Subscription = require("../models/Subscription");
 const Branch = require("../models/Branch");
+const MenuItem = require("../models/MenuItem");
+const Category = require("../models/Category");
+const Table = require("../models/Table");
+const Order = require("../models/Order");
 
-// ✅ Single source of truth
 const { applyPlanToOrg, PLAN_FEATURES } = require("../utils/planFeatures");
+
+// Email
+const { sendEmail } = require("../services/emailService");
+const orgDeletedEmail = require("../templates/emails/orgDeletedEmail");
 
 const SUPER = ["super_admin"];
 
@@ -68,7 +75,6 @@ router.get("/stats", protect, authorize(...SUPER), async (req, res) => {
       recentOrgs,
       newOrgsChart: newOrgsRaw
     });
-
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -94,7 +100,6 @@ router.get("/organizations", protect, authorize(...SUPER), async (req, res) => {
     );
 
     res.json({ success: true, organizations: orgsWithCounts });
-
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -117,8 +122,7 @@ router.put("/organizations/:id", protect, authorize(...SUPER), async (req, res) 
 });
 
 // ============================================================
-// PUT /api/super-admin/organizations/:id/plan
-// ✅ UPDATED — now uses applyPlanToOrg (auto-handles features)
+// PUT /api/super-admin/organizations/:id/plan — UNCHANGED
 // ============================================================
 router.put("/organizations/:id/plan", protect, authorize(...SUPER), async (req, res) => {
   try {
@@ -139,11 +143,9 @@ router.put("/organizations/:id/plan", protect, authorize(...SUPER), async (req, 
       });
     }
 
-    // ✅ One line — sets plan + features + limits all together
     applyPlanToOrg(org, plan);
     await org.save();
 
-    // Mirror to Subscription record
     await Subscription.findOneAndUpdate(
       { organization: req.params.id },
       { plan },
@@ -155,9 +157,172 @@ router.put("/organizations/:id/plan", protect, authorize(...SUPER), async (req, 
       message: `Plan changed to ${plan} — features auto-updated`,
       organization: org
     });
-
   } catch (err) {
     console.error("Change plan error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ============================================================
+// GET /api/super-admin/organizations/:id/delete-preview
+// ✅ NEW — Shows what will be deleted before confirmation
+// ============================================================
+router.get("/organizations/:id/delete-preview", protect, authorize(...SUPER), async (req, res) => {
+  try {
+    const orgId = req.params.id;
+
+    const org = await Organization.findById(orgId).populate("owner", "name email");
+    if (!org) {
+      return res.status(404).json({ success: false, message: "Organization not found" });
+    }
+
+    // Count everything that will be cascaded
+    const [
+      branchCount,
+      userCount,
+      menuItemCount,
+      categoryCount,
+      tableCount,
+      orderCount,
+      subscriptionCount
+    ] = await Promise.all([
+      Branch.countDocuments({ organization: orgId }),
+      User.countDocuments({ organization: orgId }),
+      MenuItem.countDocuments({ organization: orgId }),
+      Category.countDocuments({ organization: orgId }),
+      Table.countDocuments({ organization: orgId }),
+      Order.countDocuments({ organization: orgId }),
+      Subscription.countDocuments({ organization: orgId })
+    ]);
+
+    res.json({
+      success: true,
+      preview: {
+        orgName: org.name,
+        ownerName: org.owner?.name,
+        ownerEmail: org.owner?.email,
+        counts: {
+          branches: branchCount,
+          users: userCount,
+          menuItems: menuItemCount,
+          categories: categoryCount,
+          tables: tableCount,
+          orders: orderCount,
+          subscriptions: subscriptionCount
+        }
+      }
+    });
+  } catch (err) {
+    console.error("Delete preview error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ============================================================
+// DELETE /api/super-admin/organizations/:id
+// ✅ NEW — Hard delete with cascade
+// Requires: confirmation === org name
+// ============================================================
+router.delete("/organizations/:id", protect, authorize(...SUPER), async (req, res) => {
+  try {
+    const orgId = req.params.id;
+    const { confirmation, reason } = req.body;
+
+    // Find org
+    const org = await Organization.findById(orgId).populate("owner", "name email");
+    if (!org) {
+      return res.status(404).json({ success: false, message: "Organization not found" });
+    }
+
+    // Validate confirmation — must match org name exactly
+    if (!confirmation || confirmation.trim() !== org.name) {
+      return res.status(400).json({
+        success: false,
+        message: `Confirmation must match organization name exactly: "${org.name}"`
+      });
+    }
+
+    // Save owner info for email BEFORE deletion
+    const ownerInfo = org.owner ? {
+      name: org.owner.name,
+      email: org.owner.email
+    } : null;
+    const orgName = org.name;
+
+    console.log(`🗑️ Deleting organization: ${orgName} (${orgId})`);
+
+    // ── CASCADE DELETE — order matters! ──────────────────
+    // Delete child data first, then parent
+
+    const deletionStats = {};
+
+    // 1. Orders (most dependent)
+    const ordersResult = await Order.deleteMany({ organization: orgId });
+    deletionStats.orders = ordersResult.deletedCount;
+
+    // 2. Tables
+    const tablesResult = await Table.deleteMany({ organization: orgId });
+    deletionStats.tables = tablesResult.deletedCount;
+
+    // 3. Menu items
+    const menuResult = await MenuItem.deleteMany({ organization: orgId });
+    deletionStats.menuItems = menuResult.deletedCount;
+
+    // 4. Categories
+    const catResult = await Category.deleteMany({ organization: orgId });
+    deletionStats.categories = catResult.deletedCount;
+
+    // 5. Branches
+    const branchesResult = await Branch.deleteMany({ organization: orgId });
+    deletionStats.branches = branchesResult.deletedCount;
+
+    // 6. Subscriptions
+    const subsResult = await Subscription.deleteMany({ organization: orgId });
+    deletionStats.subscriptions = subsResult.deletedCount;
+
+    // 7. Try to delete Layout if model exists
+    try {
+      const Layout = require("../models/Layout");
+      const layoutResult = await Layout.deleteMany({ organization: orgId });
+      deletionStats.layouts = layoutResult.deletedCount;
+    } catch {
+      deletionStats.layouts = 0;
+    }
+
+    // 8. Users (last, includes owner)
+    const usersResult = await User.deleteMany({ organization: orgId });
+    deletionStats.users = usersResult.deletedCount;
+
+    // 9. Finally, the organization itself
+    await Organization.findByIdAndDelete(orgId);
+
+    console.log(`✅ Cascade deletion complete:`, deletionStats);
+
+    // Send goodbye email to owner (fire and forget)
+    if (ownerInfo?.email) {
+      sendEmail({
+        to: ownerInfo.email,
+        subject: `Your NUVLYX account has been deleted — ${orgName}`,
+        html: orgDeletedEmail({
+          name: ownerInfo.name,
+          orgName,
+          deletedAt: new Date(),
+          reason: reason?.trim() || null
+        })
+      }).catch(err => {
+        console.error("Org deletion email failed:", err.message);
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Organization "${orgName}" and all related data permanently deleted`,
+      deletionStats,
+      emailSent: !!ownerInfo?.email
+    });
+
+  } catch (err) {
+    console.error("Delete organization error:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
@@ -170,7 +335,6 @@ router.get("/subscriptions", protect, authorize(...SUPER), async (req, res) => {
     const subscriptions = await Subscription.find()
       .populate("organization", "name")
       .sort({ createdAt: -1 });
-
     res.json({ success: true, subscriptions });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -183,10 +347,9 @@ router.get("/subscriptions", protect, authorize(...SUPER), async (req, res) => {
 router.get("/users", protect, authorize(...SUPER), async (req, res) => {
   try {
     const users = await User.find({ role: { $ne: "super_admin" } })
-      .populate("organization", "name")
+      .populate("organization", "name slug")
       .select("-password")
       .sort({ createdAt: -1 });
-
     res.json({ success: true, users });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -203,7 +366,6 @@ router.put("/users/:id", protect, authorize(...SUPER), async (req, res) => {
       { isActive: req.body.isActive },
       { new: true }
     ).select("-password");
-
     res.json({ success: true, user });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

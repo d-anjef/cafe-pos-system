@@ -11,6 +11,8 @@ import Contact from "./landing/pages/Contact";
 /* ================= AUTH ================= */
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 /* ================= POS DASHBOARD ================= */
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
@@ -119,6 +121,10 @@ function App() {
       {/* ===== AUTH ===== */}
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+      {/* PASSWORD RESET FLOW */}
+      
+      <Route  path="/forgot-password"  element={<PublicRoute><ForgotPassword /></PublicRoute>}/>
+      <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
 
       {/* ===== SUPER ADMIN ===== */}
       <Route

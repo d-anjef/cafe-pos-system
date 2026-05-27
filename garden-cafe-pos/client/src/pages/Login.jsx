@@ -5,6 +5,8 @@ import { Mail, Lock, AlertCircle, Loader, ArrowRight, Shield, Zap, Globe } from 
 import ThemeToggle from "../components/ThemeToggle";
 import "../styles/nuvlyx-theme.css";
 import "./login.css";
+import ForgotPassword from "./ForgotPassword";
+import ResetPassword from "./ResetPassword";
 
 const getRedirectPath = (role) => {
   switch (role) {
@@ -135,9 +137,7 @@ export default function Login() {
             <div className="nv-input-group">
               <div className="nv-label-row">
                 <label>Password</label>
-                <Link to="/forgot-password" className="nv-forgot-link">
-                  Forgot password?
-                </Link>
+                
               </div>
               <div className="nv-input-wrap">
                 <Lock size={18} className="nv-input-icon" />
@@ -159,6 +159,24 @@ export default function Login() {
                 <>Sign in <ArrowRight size={16} /></>
               )}
             </button>
+            {/* Add this anywhere in your login form */}
+<div style={{
+  textAlign: "right",
+  marginTop: -8,
+  marginBottom: 4
+}}>
+  <Link
+    to="/forgot-password"
+    style={{
+      fontSize: 13,
+      color: "var(--nv-gold)",
+      textDecoration: "none",
+      fontWeight: 600
+    }}
+  >
+    Forgot password?
+  </Link>
+</div>
 
             <div className="nv-auth-divider"><span>or</span></div>
 

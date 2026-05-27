@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Building2, User, Mail, Lock, ArrowRight,
-  CheckCircle2, AlertCircle, ArrowLeft, Sparkles, Shield, Zap
+  CheckCircle2, AlertCircle, ArrowLeft, Sparkles, Shield, Zap,
+  KeyRound, RefreshCw
 } from "lucide-react";
 import ThemeToggle from "../components/ThemeToggle";
 import "../styles/nuvlyx-theme.css";
@@ -11,9 +12,9 @@ import "./signup.css";
 
 export default function Signup() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [step, setStep]                   = useState(1);
+  const [loading, setLoading]             = useState(false);
+  const [error, setError]                 = useState("");
   const [generatedStaff, setGeneratedStaff] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -29,12 +30,14 @@ export default function Signup() {
     setError("");
   };
 
+  // ── Step 1 validation ─────────────────────────────────
   const validateStep1 = () => {
     if (!formData.organizationName.trim()) return setError("Enter your business name") || false;
     if (formData.organizationName.length < 3) return setError("Name must be at least 3 characters") || false;
     return true;
   };
 
+  // ── Step 2 validation ─────────────────────────────────
   const validateStep2 = () => {
     if (!formData.name.trim()) return setError("Enter your name") || false;
     if (!/\S+@\S+\.\S+/.test(formData.email)) return setError("Enter a valid email") || false;
@@ -47,7 +50,10 @@ export default function Signup() {
     if (step === 1 && validateStep1()) setStep(2);
   };
 
-  const handleSubmit = async (e) => {
+  // ============================================================
+  // STEP 2 → 3: Request verification code
+  // ============================================================
+  const handleRequestCode = async (e) => {
     e.preventDefault();
     if (!validateStep2()) return;
 
@@ -55,29 +61,121 @@ export default function Signup() {
     setError("");
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          organizationName: formData.organizationName,
-          name: formData.name,
-          email: formData.email,
-          password: formData.password
-        })
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/send-verification`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email,
+            name: formData.name
+          })
+        }
+      );
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Registration failed");
+      if (!res.ok) throw new Error(data.message || "Failed to send code");
 
-      if (data.success && data.token) { 
-        localStorage.setItem("token", data.token); 
-        localStorage.setItem("user", JSON.stringify(data.user));
-        if (data.generatedStaff) setGeneratedStaff(data.generatedStaff);  // ✅ NEW
-        setStep(3);
-        setTimeout(() => navigate("/dashboard"), 8000);  // ✅ 8 sec so they can read
-        }
+      // Move to verification step
+      setStep(3);
     } catch (err) {
       setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ============================================================
+  // STEP 3 → 4: Verify code AND create account
+  // ============================================================
+  const handleVerifyAndRegister = async (code) => {
+    setLoading(true);
+    setError("");
+
+    try {
+      // ── 1. Verify the code ────────────────────────────
+      const verifyRes = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/verify-code`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email,
+            code
+          })
+        }
+      );
+
+      const verifyData = await verifyRes.json();
+      if (!verifyRes.ok) {
+        throw new Error(verifyData.message || "Invalid code");
+      }
+
+      // ── 2. Code verified → Now create the account ──────
+      const registerRes = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            organizationName: formData.organizationName,
+            name: formData.name,
+            email: formData.email,
+            password: formData.password
+          })
+        }
+      );
+
+      const registerData = await registerRes.json();
+      if (!registerRes.ok) {
+        throw new Error(registerData.message || "Registration failed");
+      }
+
+      // ── 3. Success — save token and show success screen ──
+      if (registerData.success && registerData.token) {
+        localStorage.setItem("token", registerData.token);
+        localStorage.setItem("user", JSON.stringify(registerData.user));
+        if (registerData.generatedStaff) {
+          setGeneratedStaff(registerData.generatedStaff);
+        }
+        setStep(4);
+        setTimeout(() => navigate("/dashboard"), 8000);
+      }
+    } catch (err) {
+      setError(err.message || "Something went wrong");
+      throw err;  // Re-throw so VerificationStep knows it failed
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ============================================================
+  // STEP 3: Resend code
+  // ============================================================
+  const handleResendCode = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/send-verification`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email,
+            name: formData.name
+          })
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to resend");
+
+      return data;
+    } catch (err) {
+      setError(err.message);
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -136,10 +234,10 @@ export default function Signup() {
         <div className="nv-auth-form-wrap">
           <div className="nv-signup-form-area">
 
-            {/* PROGRESS */}
-            {step < 3 && (
+            {/* PROGRESS (now 3 dots for steps 1, 2, 3) */}
+            {step < 4 && (
               <div className="nv-signup-progress">
-                {[1, 2].map(n => (
+                {[1, 2, 3].map(n => (
                   <div
                     key={n}
                     className={`nv-progress-pill ${step >= n ? "nv-active" : ""}`}
@@ -156,7 +254,7 @@ export default function Signup() {
               </div>
             )}
 
-            {/* STEP 1 */}
+            {/* ─── STEP 1: BUSINESS NAME ─── */}
             {step === 1 && (
               <form className="nv-auth-form" onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
                 <div className="nv-auth-header">
@@ -195,9 +293,9 @@ export default function Signup() {
               </form>
             )}
 
-            {/* STEP 2 */}
+            {/* ─── STEP 2: ACCOUNT DETAILS ─── */}
             {step === 2 && (
-              <form className="nv-auth-form" onSubmit={handleSubmit}>
+              <form className="nv-auth-form" onSubmit={handleRequestCode}>
                 <div className="nv-auth-header">
                   <h2>Create your account</h2>
                   <p>You'll manage <strong style={{color: 'var(--nv-gold)'}}>{formData.organizationName}</strong></p>
@@ -271,7 +369,7 @@ export default function Signup() {
                     disabled={loading}
                     style={{ flex: 2 }}
                   >
-                    {loading ? "Creating..." : <>Create account <ArrowRight size={16} /></>}
+                    {loading ? "Sending code..." : <>Send verification code <ArrowRight size={16} /></>}
                   </button>
                 </div>
 
@@ -283,58 +381,320 @@ export default function Signup() {
               </form>
             )}
 
-            {/* STEP 3 SUCCESS */}
+            {/* ─── STEP 3: EMAIL VERIFICATION ─── */}
             {step === 3 && (
-  <div className="nv-signup-success">
-    <div className="nv-success-icon">
-      <CheckCircle2 size={48} />
-    </div>
-    <h2>Welcome to NUVLYX 🎉</h2>
-    <p>Your account for <strong>{formData.organizationName}</strong> is ready</p>
+              <VerificationStep
+                email={formData.email}
+                onVerify={handleVerifyAndRegister}
+                onResend={handleResendCode}
+                onBack={() => setStep(2)}
+                loading={loading}
+                error={error}
+              />
+            )}
 
-    {generatedStaff && generatedStaff.length > 0 && (
-      <div style={{
-        background: 'var(--nv-glass)',
-        border: '1px solid var(--nv-gold)',
-        borderRadius: 12,
-        padding: 20,
-        margin: '24px 0',
-        textAlign: 'left'
-      }}>
-        <strong style={{ color: 'var(--nv-gold)', display: 'block', marginBottom: 12 }}>
-          🔐 Staff accounts auto-created
-        </strong>
-        <p style={{ fontSize: 13, color: 'var(--nv-text-soft)', marginBottom: 14 }}>
-          Save these credentials. You can share with your staff or change passwords later.
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {generatedStaff.map((s, i) => (
-            <div key={i} style={{
-              padding: '8px 12px',
-              background: 'var(--nv-surface)',
-              borderRadius: 8,
-              fontSize: 12
-            }}>
-              <strong style={{ textTransform: 'capitalize' }}>{s.role.replace('_', ' ')}:</strong>{' '}
-              <code style={{ color: 'var(--nv-gold)' }}>{s.email}</code>
-              <span style={{ opacity: 0.6 }}> / {s.password}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    )}
+            {/* ─── STEP 4: SUCCESS ─── */}
+            {step === 4 && (
+              <div className="nv-signup-success">
+                <div className="nv-success-icon">
+                  <CheckCircle2 size={48} />
+                </div>
+                <h2>Welcome to NUVLYX 🎉</h2>
+                <p>Your account for <strong>{formData.organizationName}</strong> is ready</p>
 
-    <div className="nv-success-list">
-      <div><CheckCircle2 size={16} /> 14-day Business trial activated</div>
-      <div><CheckCircle2 size={16} /> All staff accounts created</div>
-      <div><CheckCircle2 size={16} /> Ready to manage your café</div>
-    </div>
+                {generatedStaff && generatedStaff.length > 0 && (
+                  <div style={{
+                    background: 'var(--nv-glass)',
+                    border: '1px solid var(--nv-gold)',
+                    borderRadius: 12,
+                    padding: 20,
+                    margin: '24px 0',
+                    textAlign: 'left'
+                  }}>
+                    <strong style={{ color: 'var(--nv-gold)', display: 'block', marginBottom: 12 }}>
+                      🔐 Staff accounts auto-created
+                    </strong>
+                    <p style={{ fontSize: 13, color: 'var(--nv-text-soft)', marginBottom: 14 }}>
+                      Save these credentials. You can share with your staff or change passwords later.
+                    </p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {generatedStaff.map((s, i) => (
+                        <div key={i} style={{
+                          padding: '8px 12px',
+                          background: 'var(--nv-surface)',
+                          borderRadius: 8,
+                          fontSize: 12
+                        }}>
+                          <strong style={{ textTransform: 'capitalize' }}>{s.role.replace('_', ' ')}:</strong>{' '}
+                          <code style={{ color: 'var(--nv-gold)' }}>{s.email}</code>
+                          <span style={{ opacity: 0.6 }}> / {s.password}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-    <p className="nv-redirect">Redirecting to your dashboard...</p>
-  </div>
-)}
+                <div className="nv-success-list">
+                  <div><CheckCircle2 size={16} /> Email verified</div>
+                  <div><CheckCircle2 size={16} /> 14-day Business trial activated</div>
+                  <div><CheckCircle2 size={16} /> All staff accounts created</div>
+                  <div><CheckCircle2 size={16} /> Welcome email sent to inbox</div>
+                </div>
+
+                <p className="nv-redirect">Redirecting to your dashboard in 8 seconds...</p>
+              </div>
+            )}
           </div>
         </div>
-      </div>                      
-    </div>  );
-}       
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// VERIFICATION STEP COMPONENT
+// 6-digit code input with auto-advance + resend countdown
+// ============================================================
+function VerificationStep({ email, onVerify, onResend, onBack, loading, error }) {
+  const [code, setCode]               = useState(["", "", "", "", "", ""]);
+  const [resendCooldown, setCooldown] = useState(60);
+  const [resending, setResending]     = useState(false);
+  const inputsRef                     = useRef([]);
+
+  // ── Auto-focus first input ───────────────────────────
+  useEffect(() => {
+    if (inputsRef.current[0]) inputsRef.current[0].focus();
+  }, []);
+
+  // ── Resend cooldown countdown ────────────────────────
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown(s => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
+
+  // ── Handle digit input ───────────────────────────────
+  const handleChange = (idx, value) => {
+    // Only allow single digit
+    if (value && !/^\d$/.test(value)) return;
+
+    const newCode = [...code];
+    newCode[idx] = value;
+    setCode(newCode);
+
+    // Auto-advance to next input
+    if (value && idx < 5) {
+      inputsRef.current[idx + 1]?.focus();
+    }
+
+    // Auto-submit when all 6 digits entered
+    if (idx === 5 && value) {
+      const fullCode = [...newCode.slice(0, 5), value].join("");
+      if (fullCode.length === 6) {
+        handleSubmit(fullCode);
+      }
+    }
+  };
+
+  // ── Handle backspace to go back ──────────────────────
+  const handleKeyDown = (idx, e) => {
+    if (e.key === "Backspace" && !code[idx] && idx > 0) {
+      inputsRef.current[idx - 1]?.focus();
+    }
+  };
+
+  // ── Handle paste (paste full code) ───────────────────
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pasted.length === 0) return;
+
+    const newCode = [...code];
+    for (let i = 0; i < pasted.length && i < 6; i++) {
+      newCode[i] = pasted[i];
+    }
+    setCode(newCode);
+
+    // Focus last filled or first empty
+    const nextEmptyIdx = newCode.findIndex(c => !c);
+    const focusIdx = nextEmptyIdx === -1 ? 5 : nextEmptyIdx;
+    inputsRef.current[focusIdx]?.focus();
+
+    // Auto-submit if 6 digits pasted
+    if (pasted.length === 6) {
+      handleSubmit(pasted);
+    }
+  };
+
+  // ── Submit code ──────────────────────────────────────
+  const handleSubmit = async (fullCode) => {
+    try {
+      await onVerify(fullCode);
+    } catch (err) {
+      // Clear inputs on failure for retry
+      setCode(["", "", "", "", "", ""]);
+      inputsRef.current[0]?.focus();
+    }
+  };
+
+  const handleManualSubmit = (e) => {
+    e.preventDefault();
+    const fullCode = code.join("");
+    if (fullCode.length === 6) handleSubmit(fullCode);
+  };
+
+  // ── Handle resend ────────────────────────────────────
+  const handleResend = async () => {
+    if (resendCooldown > 0 || resending) return;
+    setResending(true);
+
+    try {
+      await onResend();
+      setCooldown(60);
+      // Clear inputs
+      setCode(["", "", "", "", "", ""]);
+      inputsRef.current[0]?.focus();
+    } catch {
+      // Error handled in parent
+    } finally {
+      setResending(false);
+    }
+  };
+
+  const allFilled = code.every(c => c !== "");
+
+  return (
+    <form className="nv-auth-form" onSubmit={handleManualSubmit}>
+      <div className="nv-auth-header">
+        <div style={{
+          width: 56,
+          height: 56,
+          margin: "0 auto 16px",
+          background: "rgba(212,175,55,0.15)",
+          border: "1px solid var(--nv-gold)",
+          borderRadius: 14,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }}>
+          <KeyRound size={24} color="var(--nv-gold)" />
+        </div>
+        <h2>Check your email</h2>
+        <p>
+          We sent a 6-digit code to<br/>
+          <strong style={{ color: "var(--nv-gold)" }}>{email}</strong>
+        </p>
+      </div>
+
+      {/* 6-DIGIT INPUT */}
+      <div style={{
+        display: "flex",
+        gap: 8,
+        justifyContent: "center",
+        margin: "24px 0",
+        flexWrap: "wrap"
+      }}>
+        {code.map((digit, idx) => (
+          <input
+            key={idx}
+            ref={el => inputsRef.current[idx] = el}
+            type="text"
+            inputMode="numeric"
+            pattern="\d*"
+            maxLength="1"
+            value={digit}
+            onChange={(e) => handleChange(idx, e.target.value)}
+            onKeyDown={(e) => handleKeyDown(idx, e)}
+            onPaste={idx === 0 ? handlePaste : undefined}
+            disabled={loading}
+            style={{
+              width: 48,
+              height: 56,
+              fontSize: 24,
+              fontWeight: 700,
+              textAlign: "center",
+              borderRadius: 10,
+              border: digit
+                ? "2px solid var(--nv-gold)"
+                : "1px solid var(--nv-border)",
+              background: "var(--nv-surface)",
+              color: "var(--nv-text)",
+              outline: "none",
+              transition: "all 0.15s"
+            }}
+          />
+        ))}
+      </div>
+
+      <button
+        type="submit"
+        className="nv-btn-gold nv-auth-submit"
+        disabled={!allFilled || loading}
+        style={{
+          opacity: (!allFilled || loading) ? 0.5 : 1,
+          cursor: (!allFilled || loading) ? "not-allowed" : "pointer"
+        }}
+      >
+        {loading ? "Verifying..." : <>Verify & Create Account <ArrowRight size={16} /></>}
+      </button>
+
+      {/* RESEND */}
+      <div style={{
+        textAlign: "center",
+        marginTop: 20,
+        fontSize: 13,
+        color: "var(--nv-text-soft)"
+      }}>
+        Didn't receive the code?{" "}
+        {resendCooldown > 0 ? (
+          <span style={{ opacity: 0.5 }}>
+            Resend in {resendCooldown}s
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={resending}
+            className="nv-link"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: resending ? "wait" : "pointer",
+              padding: 0,
+              fontWeight: 600,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4
+            }}
+          >
+            <RefreshCw size={12} />
+            {resending ? "Sending..." : "Resend code"}
+          </button>
+        )}
+      </div>
+
+      <button
+        type="button"
+        className="nv-btn-ghost"
+        onClick={onBack}
+        disabled={loading}
+        style={{ marginTop: 16, width: "100%" }}
+      >
+        <ArrowLeft size={16} /> Use a different email
+      </button>
+
+      {/* INFO BOX */}
+      <div style={{
+        marginTop: 16,
+        padding: 12,
+        background: "var(--nv-glass)",
+        borderRadius: 10,
+        fontSize: 11,
+        color: "var(--nv-text-soft)",
+        textAlign: "center"
+      }}>
+        💡 Tip: Check your spam folder if you don't see it
+      </div>
+    </form>
+  );
+}

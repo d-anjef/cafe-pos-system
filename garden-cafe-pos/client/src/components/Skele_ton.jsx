@@ -1,4 +1,4 @@
-import './Skeletons.css';
+import './SKele_ton.css';
 
 // Generic skeleton
 export const Skeleton = ({ width = '100%', height = 20, radius = 6, style = {} }) => (

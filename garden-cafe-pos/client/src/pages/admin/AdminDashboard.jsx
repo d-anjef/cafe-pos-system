@@ -82,8 +82,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-shell">
-
-      <TrialBanner/>
+      
 
       {/* SIDEBAR */}
       <div className="admin-sidebar glass-card">
@@ -169,9 +168,10 @@ export default function AdminDashboard() {
         {activeTab === "organization" && <OrganizationTab />}
         
 
-      </div>
+          </div>
+      <TrialBanner />
     </div>
-  );
+);
 }
 
 // ============================================================

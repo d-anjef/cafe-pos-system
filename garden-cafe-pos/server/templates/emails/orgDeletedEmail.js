@@ -20,7 +20,7 @@ function orgDeletedEmailTemplate({ name, orgName, deletedAt, reason }) {
     <p>This email is to confirm that your NUVLYX account for <strong style="color:#d4af37;">${orgName}</strong> has been deleted.</p>
 
     <!-- DELETION DETAILS -->
-    <div style="background:rgba(229,57,53,0.05); border:1px solid rgba(229,57,53,0.25); border-radius:12px; padding:20px; margin:24px 0;">
+    <div style="background:rgba(231, 172, 8, 0.77); border:1px solid rgba(229,57,53,0.25); border-radius:12px; padding:20px; margin:24px 0;">
       <div style="font-size:11px; color:#e57373; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:12px;">
         Account Permanently Removed
       </div>
@@ -42,7 +42,7 @@ function orgDeletedEmailTemplate({ name, orgName, deletedAt, reason }) {
       What was removed
     </h3>
 
-    <div style="background:rgba(255,255,255,0.03); border-radius:10px; padding:16px 20px; font-size:13px; color:rgba(255,255,255,0.75); line-height:1.8;">
+    <div style="background:rgba(147, 177, 17, 0.62); border-radius:10px; padding:16px 20px; font-size:13px; color:rgba(255,255,255,0.75); line-height:1.8;">
       ✗ All branch information<br/>
       ✗ All staff accounts<br/>
       ✗ All menu items and categories<br/>

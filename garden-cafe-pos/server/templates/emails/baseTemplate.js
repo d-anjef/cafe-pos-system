@@ -1,7 +1,7 @@
 // ============================================================
-// Base HTML email template
+// Base HTML email template — LIGHT THEME (dark-mode safe)
 // All emails wrap their content in this
-// Dark theme with gold accent (NUVLYX brand)
+// Works in BOTH light AND dark mode email clients
 // ============================================================
 
 /**
@@ -22,22 +22,42 @@ function baseTemplate({ title, preheader = "", content, cta = null }) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light only" />
+  <meta name="supported-color-schemes" content="light only" />
   <title>${title}</title>
   <style>
-    body { margin: 0; padding: 0; background: #0f0f0f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; }
+    :root {
+      color-scheme: light only;
+      supported-color-schemes: light only;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f5f5f7;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      color: #1a1a1a;
+    }
     table { border-collapse: collapse; }
-    a { color: #d4af37; text-decoration: none; }
+    a { color: #b8941f; text-decoration: none; }
     .preheader { display: none; max-height: 0; overflow: hidden; }
+
+    /* Force light mode in Gmail/iOS Mail/Outlook dark mode */
+    [data-ogsc] body, [data-ogsb] body { background: #f5f5f7 !important; color: #1a1a1a !important; }
+    [data-ogsc] .email-card, [data-ogsb] .email-card { background: #ffffff !important; }
+    [data-ogsc] .email-text, [data-ogsb] .email-text { color: #1a1a1a !important; }
+    [data-ogsc] .email-text-soft, [data-ogsb] .email-text-soft { color: #555555 !important; }
+    [data-ogsc] .email-text-muted, [data-ogsb] .email-text-muted { color: #888888 !important; }
+    [data-ogsc] .brand-title, [data-ogsb] .brand-title { color: #b8941f !important; }
   </style>
 </head>
-<body style="margin:0; padding:0; background:#0f0f0f; color:#ffffff;">
+<body class="email-body" style="margin:0; padding:0; background:#f5f5f7; color:#1a1a1a;">
 
   <!-- Preheader (hidden, but shows in inbox preview) -->
-  <div class="preheader" style="display:none;font-size:1px;color:#0f0f0f;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
+  <div class="preheader" style="display:none;font-size:1px;color:#f5f5f7;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
     ${preheader}
   </div>
 
-  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:#0f0f0f; padding: 40px 20px;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:#f5f5f7; padding: 40px 20px;">
     <tr>
       <td align="center">
 
@@ -47,10 +67,10 @@ function baseTemplate({ title, preheader = "", content, cta = null }) {
           <!-- LOGO/BRAND -->
           <tr>
             <td align="center" style="padding-bottom: 30px;">
-              <h1 style="margin:0; font-size:28px; font-weight:900; color:#d4af37; letter-spacing:2px;">
+              <h1 class="brand-title" style="margin:0; font-size:32px; font-weight:900; color:#b8941f; letter-spacing:3px;">
                 NUVLYX
               </h1>
-              <p style="margin:4px 0 0; font-size:11px; color:rgba(255,255,255,0.4); letter-spacing:1px; text-transform:uppercase;">
+              <p class="email-text-muted" style="margin:6px 0 0; font-size:11px; color:#888888; letter-spacing:1.5px; text-transform:uppercase; font-weight:600;">
                 From idea to impact
               </p>
             </td>
@@ -58,15 +78,18 @@ function baseTemplate({ title, preheader = "", content, cta = null }) {
 
           <!-- CONTENT CARD -->
           <tr>
-            <td style="background:linear-gradient(135deg, #1a1a1a 0%, #1f1f1f 100%); border-radius:16px; padding:40px 32px; border:1px solid rgba(212,175,55,0.15);">
-              
+            <td class="email-card" style="background:#ffffff; border-radius:16px; padding:40px 32px; border:1px solid #e8e8ea; box-shadow: 0 2px 12px rgba(0,0,0,0.04);">
+
+              <!-- Gold accent bar -->
+              <div style="height:4px; background:linear-gradient(90deg, #d4af37, #f0c445, #d4af37); border-radius:2px; margin:-40px -32px 28px -32px; border-radius:16px 16px 0 0;"></div>
+
               <!-- Title -->
-              <h2 style="margin:0 0 24px; font-size:24px; font-weight:700; color:#ffffff; line-height:1.3;">
+              <h2 class="email-text" style="margin:0 0 20px; font-size:24px; font-weight:800; color:#1a1a1a; line-height:1.3;">
                 ${title}
               </h2>
 
               <!-- Body content -->
-              <div style="color:rgba(255,255,255,0.85); font-size:15px; line-height:1.6;">
+              <div class="email-text-soft" style="color:#3a3a3a; font-size:15px; line-height:1.7;">
                 ${content}
               </div>
 
@@ -75,8 +98,8 @@ function baseTemplate({ title, preheader = "", content, cta = null }) {
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-top:32px;">
                 <tr>
                   <td align="center">
-                    <a href="${cta.url}" 
-                       style="display:inline-block; background:linear-gradient(135deg, #d4af37 0%, #f0cc55 100%); color:#000000; padding:14px 36px; border-radius:10px; font-weight:700; font-size:15px; text-decoration:none;">
+                    <a href="${cta.url}"
+                       style="display:inline-block; background:linear-gradient(135deg, #d4af37 0%, #f0c445 100%); color:#1a1a1a; padding:14px 36px; border-radius:10px; font-weight:800; font-size:15px; text-decoration:none; box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);">
                       ${cta.text}
                     </a>
                   </td>
@@ -90,14 +113,18 @@ function baseTemplate({ title, preheader = "", content, cta = null }) {
           <!-- FOOTER -->
           <tr>
             <td align="center" style="padding-top: 32px;">
-              <p style="margin:0 0 8px; font-size:12px; color:rgba(255,255,255,0.4);">
+              <p class="email-text-muted" style="margin:0 0 8px; font-size:13px; color:#666666; font-weight:600;">
                 NUVLYX SaaS POS · Built for cafés in Nepal
               </p>
-              <p style="margin:0; font-size:11px; color:rgba(255,255,255,0.3);">
-                Need help? Reply to this email or visit 
-                <a href="${appUrl}" style="color:#d4af37;">our website</a>
+              <p class="email-text-muted" style="margin:0 0 6px; font-size:12px; color:#888888;">
+                Need help? Reply to this email or visit
+                <a href="${appUrl}" style="color:#b8941f; font-weight:600;">our website</a>
               </p>
-              <p style="margin:16px 0 0; font-size:10px; color:rgba(255,255,255,0.25);">
+              <p class="email-text-muted" style="margin:8px 0 16px; font-size:12px; color:#888888;">
+                📱 WhatsApp:
+                <a href="https://wa.me/9779803506667" style="color:#b8941f; font-weight:600;">+977-9803506667</a>
+              </p>
+              <p style="margin:16px 0 0; font-size:11px; color:#aaaaaa;">
                 © ${new Date().getFullYear()} NUVLYX. All rights reserved.
               </p>
             </td>

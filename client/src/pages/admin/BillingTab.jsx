@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import { showSuccess, showError } from "../../utils/toast";
 
 const PLAN_COLORS = {
   free: "#888",
@@ -25,7 +26,7 @@ export default function BillingTab() {
       setBilling(billingRes.data);
       setPlans(plansRes.data.plans);
     } catch (err) {
-      console.error(err);
+      showError(err.response?.data?.message || "Failed to load billing information");
     } finally {
       setLoading(false);
     }
@@ -279,7 +280,7 @@ export default function BillingTab() {
 function UpgradeModal({ plans, currentPlan, preselected, onClose, onSuccess }) {
   const [plan, setPlan]                   = useState(preselected?.key || "business");
   const [billingCycle, setBillingCycle]   = useState("monthly");
-  const [paymentMethod, setPaymentMethod] = useState("bank-transfer");
+  const [paymentMethod, setPaymentMethod] = useState("esewa");
   const [transactionRef, setTransactionRef] = useState("");
   const [notes, setNotes]                 = useState("");
   const [submitting, setSubmitting]       = useState(false);
@@ -292,7 +293,7 @@ function UpgradeModal({ plans, currentPlan, preselected, onClose, onSuccess }) {
 
   const handleSubmit = async () => {
     if (!transactionRef.trim()) {
-      return alert("Please enter your transaction reference/proof");
+      return showError("Please enter your transaction reference/proof");
     }
 
     setSubmitting(true);
@@ -305,9 +306,10 @@ function UpgradeModal({ plans, currentPlan, preselected, onClose, onSuccess }) {
         notes
       });
       setSuccess(true);
+      showSuccess("Upgrade request submitted! We'll verify within 24 hours.");
       setTimeout(() => onSuccess(), 2000);
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to submit request");
+      showError(err.response?.data?.message || "Failed to submit request");
     } finally {
       setSubmitting(false);
     }
@@ -404,58 +406,186 @@ function UpgradeModal({ plans, currentPlan, preselected, onClose, onSuccess }) {
           </div>
 
           {/* PAYMENT METHOD */}
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 13, opacity: 0.7, display: "block", marginBottom: 6 }}>
-              Payment Method
-            </label>
-            <select
-              value={paymentMethod}
-              onChange={e => setPaymentMethod(e.target.value)}
-              style={{
-                width: "100%", padding: "10px",
-                borderRadius: 8,
-                border: "1px solid var(--border-soft)",
-                background: "var(--bg-card)",
-                color: "var(--text-primary)"
-              }}
-            >
-              <option value="bank-transfer">Bank Transfer</option>
-              <option value="esewa">eSewa</option>
-              <option value="khalti">Khalti</option>
-              <option value="cash">Cash</option>
-            </select>
-          </div>
+<div style={{ marginBottom: 16 }}>
+  <label style={{ fontSize: 13, opacity: 0.7, display: "block", marginBottom: 6 }}>
+    Payment Method
+  </label>
+  <select
+    value={paymentMethod}
+    onChange={e => setPaymentMethod(e.target.value)}
+    style={{
+      width: "100%", padding: "10px",
+      borderRadius: 8,
+      border: "1px solid var(--border-soft)",
+      background: "var(--bg-card)",
+      color: "var(--text-primary)"
+    }}
+  >
+    <option value="esewa">✅ eSewa (Recommended)</option>
+    <option value="khalti">Khalti</option>
+    <option value="bank-transfer" disabled>Bank Transfer (Coming Soon)</option>
+    <option value="cash">Cash (Contact Us)</option>
+  </select>
+</div>
+{/* PAYMENT INSTRUCTIONS */}
+<div style={{
+  background: "#d4af3711",
+  border: "1px solid #d4af3744",
+  borderRadius: 8,
+  padding: 16,
+  marginBottom: 16,
+  fontSize: 13
+}}>
+  <strong style={{ color: "#d4af37", display: "block", marginBottom: 12 }}>
+    💡 Payment Instructions
+  </strong>
 
-          {/* PAYMENT INSTRUCTIONS */}
-          <div style={{
-            background: "#d4af3711",
-            border: "1px solid #d4af3744",
-            borderRadius: 8,
-            padding: 14,
-            marginBottom: 16,
-            fontSize: 13
-          }}>
-            <strong style={{ color: "#d4af37" }}>💡 Payment Instructions</strong>
-            <div style={{ marginTop: 8, opacity: 0.85, lineHeight: 1.6 }}>
-              {paymentMethod === "bank-transfer" && (
-                <>
-                  Transfer <strong>NPR {amount}</strong> to:<br/>
-                  Bank: <strong>Nabil Bank</strong><br/>
-                  Account: <strong>0123456789</strong><br/>
-                  Name: <strong>Your SaaS Company</strong>
-                </>
-              )}
-              {paymentMethod === "esewa" && (
-                <>Send <strong>NPR {amount}</strong> to eSewa ID: <strong>9800000000</strong></>
-              )}
-              {paymentMethod === "khalti" && (
-                <>Send <strong>NPR {amount}</strong> to Khalti: <strong>9800000000</strong></>
-              )}
-              {paymentMethod === "cash" && (
-                <>Contact us to arrange cash pickup for <strong>NPR {amount}</strong></>
-              )}
-            </div>
-          </div>
+  {paymentMethod === "esewa" && (
+    <div style={{ lineHeight: 1.7 }}>
+      <div style={{ marginBottom: 8 }}>
+        <strong>Step 1:</strong> Open eSewa app on your phone
+      </div>
+      <div style={{ marginBottom: 8 }}>
+        <strong>Step 2:</strong> Send <span style={{ color: "#d4af37", fontWeight: 700 }}>NPR {amount.toLocaleString()}</span> to:
+      </div>
+
+      <div style={{
+        background: "rgba(0,0,0,0.3)",
+        padding: "12px 16px",
+        borderRadius: 8,
+        margin: "8px 0",
+        fontFamily: "monospace",
+        fontSize: 14
+      }}>
+        <div style={{ marginBottom: 4 }}>
+          📱 eSewa: <strong style={{ color: "#000205", fontSize: 16 }}>9849920994</strong>
+        </div>
+        <div>
+          👤 Name: <strong>NUVLYX</strong>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 8 }}>
+        <strong>Step 3:</strong> Copy the transaction reference from receipt
+      </div>
+      <div>
+        <strong>Step 4:</strong> Paste it below ⬇️
+      </div>
+    </div>
+  )}
+
+  {paymentMethod === "khalti" && (
+    <div style={{ lineHeight: 1.7 }}>
+      <div style={{ marginBottom: 8 }}>
+        <strong>Step 1:</strong> Open Khalti app on your phone
+      </div>
+      <div style={{ marginBottom: 8 }}>
+        <strong>Step 2:</strong> Send <span style={{ color: "#d4af37", fontWeight: 700 }}>NPR {amount.toLocaleString()}</span> to:
+      </div>
+
+      <div style={{
+        background: "rgba(0,0,0,0.3)",
+        padding: "12px 16px",
+        borderRadius: 8,
+        margin: "8px 0",
+        fontFamily: "monospace",
+        fontSize: 14
+      }}>
+        <div style={{ marginBottom: 4 }}>
+          📱 Khalti: <strong style={{ color: "#5C2D91" }}>9849920994</strong>
+        </div>
+        <div>
+          👤 Name: <strong>NUVLYX</strong>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 8 }}>
+        <strong>Step 3:</strong> Copy the transaction reference from receipt
+      </div>
+      <div>
+        <strong>Step 4:</strong> Paste it below ⬇️
+      </div>
+    </div>
+  )}
+
+  {paymentMethod === "bank-transfer" && (
+    <div style={{
+      padding: "10px 12px",
+      background: "rgba(33,150,243,0.1)",
+      borderRadius: 6,
+      color: "#64b5f6",
+      fontSize: 13
+    }}>
+      ℹ️ Bank transfer will be available once our business is registered.
+      For now, please use <strong>eSewa</strong> or <strong>Khalti</strong>.
+    </div>
+  )}
+
+  {paymentMethod === "cash" && (
+    <div style={{ lineHeight: 1.7 }}>
+      <div>Please contact us to arrange cash collection for <span style={{ color: "#d4af37", fontWeight: 700 }}>NPR {amount.toLocaleString()}</span>:</div>
+
+      <div style={{
+        background: "rgba(0,0,0,0.3)",
+        padding: "12px 16px",
+        borderRadius: 8,
+        margin: "8px 0",
+        fontSize: 14
+      }}>
+        <div style={{ marginBottom: 6 }}>
+          📱 WhatsApp: <a 
+            href="https://wa.me/9779803506667"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#25d366", fontWeight: 700 }}
+          >
+            +977-9803506667
+          </a>
+        </div>
+        <div>
+          📧 Email: <a 
+            href="mailto:support@nuvlyx.anjef.com.np"
+            style={{ color: "#d4af37" }}
+          >
+            support@nuvlyx.anjef.com.np
+          </a>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* HELP NOTE — Always shown */}
+  <div style={{
+    marginTop: 14,
+    paddingTop: 12,
+    borderTop: "1px solid rgba(212,175,55,0.2)",
+    fontSize: 12,
+    opacity: 0.8,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    flexWrap: "wrap"
+  }}>
+    <span>💬 Need help?</span>
+    <div style={{ display: "flex", gap: 12 }}>
+      <a 
+        href="https://wa.me/9779803506667"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ color: "#25d366", fontWeight: 600, textDecoration: "none" }}
+      >
+        📱 WhatsApp
+      </a>
+      <a 
+        href="mailto:support@nuvlyx.anjef.com.np"
+        style={{ color: "#d4af37", fontWeight: 600, textDecoration: "none" }}
+      >
+        📧 Email
+      </a>
+    </div>
+  </div>
+</div>
 
           {/* TRANSACTION REFERENCE */}
           <div style={{ marginBottom: 16 }}>

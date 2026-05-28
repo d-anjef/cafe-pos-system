@@ -19,6 +19,10 @@ import StaffTab from "./StaffTab";
 import BranchTab from "./BranchTab";
 import MenuTab from "./MenuTab.jsx";  
 import OrganizationTab from "./OrganizationTab";
+import TrialBanner from "../../components/TrialBanner";
+import { showSuccess, showError, showWarning, confirmAction } from "../../utils/toast";
+import { DashboardSkeleton } from "../../components/Skeletons.jsx";
+import EmptyState from "../../components/EmptyState";
 import "../../styles/admin.css";
 
 export default function AdminDashboard() {
@@ -32,6 +36,7 @@ export default function AdminDashboard() {
   // ============================================================
   if (!activeBranch && user?.role !== "super_admin") {
     return (
+      <><TrialBanner/>
       <div className="admin-shell">
         <div className="admin-content">
           <div className="tab-loading">
@@ -39,6 +44,7 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
@@ -76,6 +82,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-shell">
+      
 
       {/* SIDEBAR */}
       <div className="admin-sidebar glass-card">
@@ -161,9 +168,10 @@ export default function AdminDashboard() {
         {activeTab === "organization" && <OrganizationTab />}
         
 
-      </div>
+          </div>
+      <TrialBanner />
     </div>
-  );
+);
 }
 
 // ============================================================
@@ -197,12 +205,14 @@ function DashboardTab() {
     return () => socket.off("order:completed");
   }, [activeBranch]);
 
-  if (loading) return (
-    <div className="tab-loading">Loading analytics...</div>
-  );
+  if (loading) return <DashboardSkeleton />;
 
   if (!data) return (
-    <div className="tab-loading">No data available</div>
+    <EmptyState
+      icon="📊"
+      title="No data available"
+      description="Analytics data will appear once you start receiving orders"
+    />
   );
 
   const avg = data.revenueToday.count > 0
@@ -364,7 +374,7 @@ function TablesTab() {
 
   const handleAdd = async () => {
     if (!form.tableNumber || !form.capacity) {
-      return alert("Fill all fields");
+      return showError("Please fill all fields");
     }
 
     try {
@@ -374,38 +384,49 @@ function TablesTab() {
         capacity: parseInt(form.capacity)
       });
       setForm({ tableNumber: "", capacity: "" });
+      showSuccess(`Table ${form.tableNumber} added!`);
       loadTables();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to add table");
+      showError(err.response?.data?.message || "Failed to add table");
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this table?")) return;
+  const handleDelete = async (id, tableNumber) => {
+    const ok = await confirmAction(`Delete Table ${tableNumber}?`);
+    if (!ok) return;
+
     try {
       await api.delete(`/tables/${id}`);
+      showSuccess(`Table ${tableNumber} deleted`);
       loadTables();
     } catch (err) {
-      alert(err.response?.data?.message || "Cannot delete");
+      showError(err.response?.data?.message || "Cannot delete table");
     }
   };
 
-  const handleRelease = async (id) => {
-    if (!window.confirm("Release this table?")) return;
-    await api.put(`/tables/${id}/release`);
-    loadTables();
+  const handleRelease = async (id, tableNumber) => {
+    const ok = await confirmAction(`Release Table ${tableNumber}?`);
+    if (!ok) return;
+
+    try {
+      await api.put(`/tables/${id}/release`);
+      showSuccess(`Table ${tableNumber} released`);
+      loadTables();
+    } catch (err) {
+      showError(err.response?.data?.message || "Failed to release table");
+    }
   };
 
   const getStatusStyle = (status) => {
     if (status === "available") return { color: "#4caf50" };
     if (status === "occupied") return { color: "#d4af37" };
-    if (status === "bill_requested") return { color: "#e53935" };
+    if (status === "bill_requested" || status === "bill-requested") return { color: "#e53935" };
     return {};
   };
 
   const available = tables.filter(t => t.status === "available").length;
   const occupied = tables.filter(t => t.status === "occupied").length;
-  const billReq = tables.filter(t => t.status === "bill_requested").length;
+  const billReq = tables.filter(t => t.status === "bill_requested" || t.status === "bill-requested").length;
 
   return (
     <div className="admin-tab">
@@ -468,40 +489,53 @@ function TablesTab() {
 
       {/* TABLE LIST */}
       <div className="table-list-grid">
-        {tables.map(table => (
-          <div
-            key={table._id}
-            className="table-list-card glass-card"
-          >
-            <div className="table-list-number">
-              T{table.tableNumber}
-            </div>
-
-            <div className="table-list-info">
-              <span>{table.capacity} seats</span>
-              <span
-                style={getStatusStyle(table.status)}
-                className="table-status-text"
-              >
-                {table.status.replace("_", " ")}
-              </span>
-            </div>
-
-            <div className="table-list-actions">
-              {table.status !== "available" && (
-                <button onClick={() => handleRelease(table._id)}>
-                  Release
-                </button>
-              )}
-              <button
-                onClick={() => handleDelete(table._id)}
-                style={{ color: "#e53935" }}
-              >
-                Delete
-              </button>
-            </div>
+        {tables.length === 0 ? (
+          <div style={{
+            gridColumn: "1 / -1",
+            padding: "60px 20px",
+            textAlign: "center",
+            opacity: 0.5
+          }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>🪑</div>
+            <h3 style={{ margin: "0 0 4px 0" }}>No tables yet</h3>
+            <p style={{ margin: 0, fontSize: 13 }}>Add your first table using the form above</p>
           </div>
-        ))}
+        ) : (
+          tables.map(table => (
+            <div
+              key={table._id}
+              className="table-list-card glass-card"
+            >
+              <div className="table-list-number">
+                T{table.tableNumber}
+              </div>
+
+              <div className="table-list-info">
+                <span>{table.capacity} seats</span>
+                <span
+                  style={getStatusStyle(table.status)}
+                  className="table-status-text"
+                >
+                  {table.status.replace("_", " ").replace("-", " ")}
+                </span>
+              </div>
+
+              <div className="table-list-actions">
+                {table.status !== "available" && (
+                  <button onClick={() => handleRelease(table._id, table.tableNumber)}>
+                    Release
+                  </button>
+                )}
+                <button
+                  onClick={() => handleDelete(table._id, table.tableNumber)}
+                  style={{ color: "#e53935" }}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
@@ -547,7 +581,7 @@ function OrdersTab() {
   const exportCSV = () => {
 
     if (orders.length === 0) {
-      return alert("No orders to export");
+      return showwarning("No orders to export");
     }
 
     const headers = [
@@ -609,6 +643,7 @@ function OrdersTab() {
     link.click();
 
     URL.revokeObjectURL(url);
+    showSuccess(`Exported ${orders.length} orders to CSV`);
   };
 
   // ============================================================
@@ -754,9 +789,15 @@ function OrdersTab() {
 
       ) : orders.length === 0 ? (
 
-        <div className="tab-empty">
-          No {view} orders
-        </div>
+        <EmptyState
+          icon="📦"
+          title={`No ${view} orders`}
+          description={
+            view === "active"
+              ? "New orders from your café will appear here in real-time"
+              : "Completed orders will be shown here"
+          }
+        />
 
       ) : (
 

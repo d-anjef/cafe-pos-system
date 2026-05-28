@@ -5,6 +5,7 @@ import {
   Plus, Search, Edit, Trash2, Key, X, Check,
   User as UserIcon, Mail, Lock, Phone, Briefcase
 } from "lucide-react";
+import { showSuccess, showError } from "../../utils/toast";
 
 const ROLE_COLORS = {
   admin:          "#4caf50",
@@ -51,22 +52,25 @@ export default function StaffTab() {
 
   useEffect(() => { loadStaff(); }, []);
 
-  const handleToggleActive = async (s) => {
+ const handleToggleActive = async (s) => {
     try {
       await api.put(`/staff/${s._id}`, { isActive: !s.isActive });
+      showSuccess(s.isActive ? `${s.name} deactivated` : `${s.name} activated`);
       loadStaff();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to update");
+      showError(err.response?.data?.message || "Failed to update");
     }
   };
 
-  const handleDelete = async (s) => {
-    if (!window.confirm(`Delete ${s.name}? This cannot be undone.`)) return;
+ const handleDelete = async (s) => {
+    const ok = await confirmAction(`Delete ${s.name}? This cannot be undone.`);
+    if (!ok) return;
     try {
       await api.delete(`/staff/${s._id}`);
+      showSuccess(`${s.name} deleted`);
       loadStaff();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to delete");
+      showError(err.response?.data?.message || "Failed to delete");
     }
   };
 
@@ -360,6 +364,7 @@ function StaffModal({ mode, staff, branches, onClose, onSuccess }) {
           phone: form.phone,
           salary: form.salary ? Number(form.salary) : undefined
         });
+        showSuccess(`${form.name} updated`);
       } else {
         await api.post("/staff", {
           name: form.name,
@@ -370,6 +375,7 @@ function StaffModal({ mode, staff, branches, onClose, onSuccess }) {
           phone: form.phone,
           salary: form.salary ? Number(form.salary) : undefined
         });
+        showSuccess(`${form.name} added as ${form.role.replace('_', ' ')}`);
       }
       onSuccess();
     } catch (err) {
@@ -566,6 +572,7 @@ function ResetPasswordModal({ staff, onClose, onSuccess }) {
     try {
       await api.put(`/staff/${staff._id}/reset-password`, { newPassword: password });
       setSuccess(true);
+      showSuccess(`Password reset for ${staff.name}`);
       setTimeout(() => onSuccess(), 2000);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to reset");

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import { showSuccess, showError, confirmAction } from "../../utils/toast";
+import EmptyState from "../../components/EmptyState";
 import {
   Plus, Edit, Trash2, X, Star, Eye, EyeOff,
   Tag, Layers, ChefHat, Search
@@ -30,6 +32,7 @@ export default function MenuTab() {
       setCategories(catsRes.data);
     } catch (err) {
       console.error(err);
+      showError("Failed to load menu");
     } finally {
       setLoading(false);
     }
@@ -38,40 +41,46 @@ export default function MenuTab() {
   useEffect(() => { loadAll(); }, []);
 
   const handleDelete = async (item) => {
-    if (!window.confirm(`Delete "${item.name}"?`)) return;
+    const ok = await confirmAction(`Delete "${item.name}"?`);
+    if (!ok) return;
     try {
       await api.delete(`/menu/item/${item._id}`);
+      showSuccess(`${item.name} deleted`);
       loadAll();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed");
+      showError(err.response?.data?.message || "Failed to delete item");
     }
   };
 
   const handleToggleAvail = async (item) => {
     try {
       await api.put(`/menu/item/${item._id}/toggle`);
+      showSuccess(item.isAvailable ? `${item.name} disabled` : `${item.name} enabled`);
       loadAll();
     } catch (err) {
-      alert("Failed to toggle");
+      showError("Failed to toggle availability");
     }
   };
 
   const handleToggleSpecial = async (item) => {
     try {
       await api.put(`/menu/item/${item._id}/special`);
+      showSuccess(item.isTodaysSpecial ? "Removed from specials" : "Marked as today's special");
       loadAll();
     } catch (err) {
-      alert("Failed to toggle special");
+      showError("Failed to toggle special status");
     }
   };
 
   const handleDeleteCat = async (cat) => {
-    if (!window.confirm(`Delete category "${cat.name}"?`)) return;
+    const ok = await confirmAction(`Delete category "${cat.name}"? This might affect items in this category.`);
+    if (!ok) return;
     try {
       await api.delete(`/menu/categories/${cat._id}`);
+      showSuccess(`Category "${cat.name}" deleted`);
       loadAll();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed");
+      showError(err.response?.data?.message || "Failed to delete category");
     }
   };
 
@@ -180,13 +189,17 @@ export default function MenuTab() {
 
           {/* ITEMS BY CATEGORY */}
           {Object.keys(grouped).length === 0 ? (
-            <div className="glass-card" style={{ padding: 40, textAlign: "center" }}>
-              <ChefHat size={48} style={{ opacity: 0.3, marginBottom: 12 }} />
-              <h3>No menu items yet</h3>
-              <p style={{ opacity: 0.6, marginTop: 8 }}>
-                Add categories first, then create your first menu item.
-              </p>
-            </div>
+            <EmptyState
+              icon="👨‍🍳"
+              title={search ? "No matches found" : "No menu items yet"}
+              description={
+                search
+                  ? `No items match "${search}". Try a different search.`
+                  : "Create categories first, then add your first menu item to get started."
+              }
+              actionLabel={!search ? "Add Your First Item" : null}
+              onAction={() => { setEditItem(null); setShowItemModal(true); }}
+            />
           ) : (
             Object.entries(grouped).map(([catName, catItems]) => {
               const catData = categories.find(c => c.name === catName);
@@ -231,13 +244,13 @@ export default function MenuTab() {
           </div>
 
           {categories.length === 0 ? (
-            <div className="glass-card" style={{ padding: 40, textAlign: "center" }}>
-              <Tag size={48} style={{ opacity: 0.3, marginBottom: 12 }} />
-              <h3>No categories yet</h3>
-              <p style={{ opacity: 0.6, marginTop: 8 }}>
-                Create categories like "Momo", "Beverages", "Snacks" first.
-              </p>
-            </div>
+            <EmptyState
+              icon="🏷️"
+              title="No categories yet"
+              description="Create categories like 'Momo', 'Beverages', or 'Snacks' to organize your menu items."
+              actionLabel="Add Your First Category"
+              onAction={() => { setEditCategory(null); setShowCatModal(true); }}
+            />
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 12 }}>
               {categories.map(cat => {
@@ -295,7 +308,12 @@ export default function MenuTab() {
           item={editItem}
           categories={categories}
           onClose={() => { setShowItemModal(false); setEditItem(null); }}
-          onSuccess={() => { setShowItemModal(false); setEditItem(null); loadAll(); }}
+          onSuccess={() => {
+            showSuccess(editItem ? `${editItem.name} updated` : "New item created");
+            setShowItemModal(false);
+            setEditItem(null);
+            loadAll();
+          }}
         />
       )}
 
@@ -303,7 +321,12 @@ export default function MenuTab() {
         <CategoryModal
           category={editCategory}
           onClose={() => { setShowCatModal(false); setEditCategory(null); }}
-          onSuccess={() => { setShowCatModal(false); setEditCategory(null); loadAll(); }}
+          onSuccess={() => {
+            showSuccess(editCategory ? `${editCategory.name} updated` : "New category created");
+            setShowCatModal(false);
+            setEditCategory(null);
+            loadAll();
+          }}
         />
       )}
     </div>
@@ -475,7 +498,7 @@ function ItemModal({ item, categories, onClose, onSuccess }) {
       }
       onSuccess();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed");
+      setError(err.response?.data?.message || "Failed to save item");
     } finally {
       setLoading(false);
     }
@@ -712,7 +735,7 @@ function CategoryModal({ category, onClose, onSuccess }) {
       }
       onSuccess();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed");
+      setError(err.response?.data?.message || "Failed to save category");
     } finally {
       setLoading(false);
     }

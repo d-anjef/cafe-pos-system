@@ -7,10 +7,15 @@ import Features from "./landing/pages/Features";
 import Pricing from "./landing/pages/Pricing";
 import About from "./landing/pages/About";
 import Contact from "./landing/pages/Contact";
+import Privacy from "./landing/pages/Privacy";          
+import Terms from "./landing/pages/Terms";              
+import Refund from "./landing/pages/Refund";            
 
 /* ================= AUTH ================= */
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 /* ================= POS DASHBOARD ================= */
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
@@ -19,7 +24,11 @@ import AdminLayoutDesigner from "./pages/admin/AdminLayoutDesigner";
 import WaiterDashboard from "./pages/WaiterDashboard";
 import WaiterFloorPlan from "./pages/waiter/WaiterFloorPlan";
 import KitchenKDS from "./pages/KitchenKDS";
+import PublicMenu from "./pages/PublicMenu";
 
+/* ================= COMPONENTS ================= */
+import CookieBanner from "./components/ConsentBanner";   
+import NotFound from "./pages/Notfound";
 /* ================= STYLES ================= */
 import "./styles/global.css";
 import "./landing/styles/landing.css";
@@ -107,89 +116,96 @@ function App() {
   if (loading) return <FullPageLoader text="Loading Application..." />;
 
   return (
-    <Routes>
+    <>
+      <Routes>
 
-      {/* ===== LANDING ===== */}
-      <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
-      <Route path="/features" element={<PublicRoute><Features /></PublicRoute>} />
-      <Route path="/pricing" element={<PublicRoute><Pricing /></PublicRoute>} />
-      <Route path="/about" element={<PublicRoute><About /></PublicRoute>} />
-      <Route path="/contact" element={<PublicRoute><Contact /></PublicRoute>} />
+        {/* ===== LANDING ===== */}
+        <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
+        <Route path="/features" element={<PublicRoute><Features /></PublicRoute>} />
+        <Route path="/pricing" element={<PublicRoute><Pricing /></PublicRoute>} />
+        <Route path="/about" element={<PublicRoute><About /></PublicRoute>} />
+        <Route path="/contact" element={<PublicRoute><Contact /></PublicRoute>} />
 
-      {/* ===== AUTH ===== */}
-      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+        {/* ===== LEGAL — ✅ NEW (public, no PublicRoute wrapper so logged-in users can view too) ===== */}
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/refund-policy" element={<Refund />} />
 
-      {/* ===== SUPER ADMIN ===== */}
-      <Route
-  path="/super-admin"
-  element={
-    <Protected roles={["super_admin"]}>
-      <SuperAdminDashboard />
-    </Protected>
-  }
-/>
+        {/* ===== AUTH ===== */}
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+        <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>}/>
+        <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
 
-      {/* ===== ADMIN / OWNER / MANAGER ===== */}
-      <Route 
-       path="/super-admin" 
-        element={ 
-          <Protected roles={["super_admin"]}> 
-            <SuperAdminDashboard /> 
-            </Protected> 
-        }  
+        {/* ===== SUPER ADMIN ===== */}
+        <Route
+          path="/super-admin"
+          element={
+            <Protected roles={["super_admin"]}>
+              <SuperAdminDashboard />
+            </Protected>
+          }
         />
-      <Route
-        path="/admin"
-        element={
-          <Protected roles={["owner", "admin", "branch_manager"]}>
-            <AdminDashboard />
-          </Protected>
-        }
-      />
-      <Route
-        path="/admin/layout"
-        element={
-          <Protected roles={["owner", "admin", "branch_manager"]}>
-            <AdminLayoutDesigner />
-          </Protected>
-        }
-      />
 
-      {/* ===== WAITER ===== */}
-      <Route
-        path="/waiter"
-        element={
-          <Protected roles={["waiter"]}>
-            <WaiterDashboard />
-          </Protected>
-        }
-      />
-      <Route
-        path="/waiter/floor"
-        element={
-          <Protected roles={["waiter"]}>
-            <WaiterFloorPlan />
-          </Protected>
-        }
-      />
+        {/* ===== ADMIN / OWNER / MANAGER ===== */}
+        <Route
+          path="/admin"
+          element={
+            <Protected roles={["owner", "admin", "branch_manager"]}>
+              <AdminDashboard />
+            </Protected>
+          }
+        />
+        <Route
+          path="/admin/layout"
+          element={
+            <Protected roles={["owner", "admin", "branch_manager"]}>
+              <AdminLayoutDesigner />
+            </Protected>
+          }
+        />
 
-      {/* ===== KITCHEN ===== */}
-      <Route
-        path="/kitchen"
-        element={
-          <Protected roles={["kitchen"]}>
-            <KitchenKDS />
-          </Protected>
-        }
-      />
+        {/* ===== WAITER ===== */}
+        <Route
+          path="/waiter"
+          element={
+            <Protected roles={["waiter"]}>
+              <WaiterDashboard />
+            </Protected>
+          }
+        />
+        <Route
+          path="/waiter/floor"
+          element={
+            <Protected roles={["waiter"]}>
+              <WaiterFloorPlan />
+            </Protected>
+          }
+        />
 
-      {/* ===== UTILS ===== */}
-      <Route path="/dashboard" element={<DashboardRedirect />} />
-      <Route path="/unauthorized" element={<Unauthorized />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
+        {/* ===== KITCHEN ===== */}
+        <Route
+          path="/kitchen"
+          element={
+            <Protected roles={["kitchen"]}>
+              <KitchenKDS />
+            </Protected>
+          }
+        />
 
-    </Routes>
+        {/* ===== PUBLIC QR MENU (no auth required) ===== */}
+        <Route path="/menu/:branchId/:tableId" element={<PublicMenu />} />
+
+        {/* ===== UTILS ===== */}
+        <Route path="/dashboard" element={<DashboardRedirect />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="*" element={<NotFound />} />
+
+      </Routes>
+
+      {/* ✅ COOKIE BANNER — shows on all pages */}
+      <CookieBanner />
+    </>
   );
 }
 

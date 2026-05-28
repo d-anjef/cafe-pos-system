@@ -21,7 +21,7 @@ import MenuTab from "./MenuTab.jsx";
 import OrganizationTab from "./OrganizationTab";
 import TrialBanner from "../../components/TrialBanner";
 import { showSuccess, showError, showWarning, confirmAction } from "../../utils/toast";
-import { DashboardSkeleton } from "../../components/Skele_ton.jsx";
+import { DashboardSkeleton } from "../../components/Skeletons.jsx";
 import EmptyState from "../../components/EmptyState";
 import "../../styles/admin.css";
 

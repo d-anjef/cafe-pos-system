@@ -6,6 +6,9 @@ import {
   BarChart, Bar, LineChart, Line,
   XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell
 } from "recharts";
+
+import EmptyState from "../../components/EmptyState";
+import ErrorBoundary from "../../components/ErrorBoundary";
 import "../../styles/admin.css";
 
 const PLAN_COLORS = {
@@ -49,7 +52,7 @@ export default function SuperAdminDashboard() {
       <div className="admin-sidebar glass-card">
         <div className="admin-logo">
           <span>👑</span>
-          <h2>SAAS ADMIN</h2>
+          <h2>NUVLYX OWNER</h2>
         </div>
 
         <div className="admin-user">
@@ -255,14 +258,16 @@ function PendingUpgradesTab() {
   useEffect(() => { loadPending(); }, []);
 
   const handleApprove = async (subId, orgName) => {
-    if (!window.confirm(`Approve upgrade for ${orgName}? An email will be sent to the owner.`)) return;
+    const ok = await confirmAction(`Approve upgrade for ${orgName}? An email will be sent to the owner.`);
+    if (!ok) return;
+
     setProcessing(subId);
     try {
       await api.post(`/billing/approve-upgrade/${subId}`);
-      alert("✅ Upgrade approved! Owner has been notified by email.");
+      showSuccess(`Upgrade approved! ${orgName} has been notified.`);
       loadPending();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to approve");
+      showError(err.response?.data?.message || "Failed to approve");
     } finally {
       setProcessing(null);
     }
@@ -274,16 +279,16 @@ function PendingUpgradesTab() {
     );
     if (!reason) return;
     if (reason.trim().length < 10) {
-      alert("Reason must be at least 10 characters");
+      showError("Reason must be at least 10 characters");
       return;
     }
     setProcessing(subId);
     try {
       await api.post(`/billing/reject-upgrade/${subId}`, { reason: reason.trim() });
-      alert("Upgrade rejected. Owner has been notified by email.");
+      showSuccess(`Upgrade rejected. ${orgName} has been notified.`);
       loadPending();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to reject");
+      showError(err.response?.data?.message || "Failed to reject");
     } finally {
       setProcessing(null);
     }
@@ -295,7 +300,53 @@ function PendingUpgradesTab() {
     <div className="admin-tab">
       <div className="tab-header">
         <h2>Pending Upgrade Requests</h2>
-        <span>{pending.length} pending</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span>{pending.length} pending</span>
+
+          {/* 🚀 MANUAL TRIAL CRON TRIGGER */}
+          <button
+            onClick={async () => {
+              if (!window.confirm(
+                'Run trial processing NOW?\n\n' +
+                'This will:\n' +
+                '• Send warning emails (7/3/1 days before expiry)\n' +
+                '• Mark expired trials as past_due (grace period)\n' +
+                '• Auto-downgrade trials past grace period to Free plan\n\n' +
+                'Proceed?'
+              )) return;
+
+             try {
+                const res = await api.post('/trial/run-now');
+                const stats = res.data.result;
+                showSuccess(
+                  `Trial Cron Done! ` +
+                  `${stats?.warnings?.sent || 0} warnings, ` +
+                  `${stats?.expired?.expired || 0} expired, ` +
+                  `${stats?.downgraded?.downgraded || 0} downgraded`
+                );
+              } catch (err) {
+                showError('Failed: ' + (err.response?.data?.message || err.message));
+              }
+            }}
+            style={{
+              padding: '8px 16px',
+              background: 'linear-gradient(135deg, #d4af37, #f0c445)',
+              color: '#000',
+              border: 'none',
+              borderRadius: 8,
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)'
+            }}
+            title="Manually trigger trial processing (sends emails, downgrades expired trials)"
+          >
+            🚀 Run Trial Cron
+          </button>
+        </div>
       </div>
 
       {pending.length === 0 ? (
@@ -401,6 +452,7 @@ function PendingUpgradesTab() {
   );
 }
 
+
 // ============================================================
 // ORGANIZATIONS TAB — UPDATED with Delete button
 // ============================================================
@@ -427,18 +479,20 @@ function OrganizationsTab() {
   const handleToggleActive = async (orgId, current) => {
     try {
       await api.put(`/super-admin/organizations/${orgId}`, { isActive: !current });
+      showSuccess(current ? "Organization deactivated" : "Organization activated");
       loadOrgs();
     } catch {
-      alert("Failed to update organization");
+      showError("Failed to update organization");
     }
   };
 
   const handleChangePlan = async (orgId, plan) => {
     try {
       await api.put(`/super-admin/organizations/${orgId}/plan`, { plan });
+      showSuccess(`Plan changed to ${plan.toUpperCase()}`);
       loadOrgs();
     } catch {
-      alert("Failed to update plan");
+      showError("Failed to update plan");
     }
   };
 
@@ -551,8 +605,12 @@ function OrganizationsTab() {
         ))}
 
         {filtered.length === 0 && (
-          <div className="tab-empty">No organizations found</div>
-        )}
+  <EmptyState
+    icon="🏢"
+    title="No organizations found"
+    description={search ? `No matches for "${search}"` : "Organizations will appear here as customers sign up"}
+  />
+)}
       </div>
 
       {/* DELETE MODAL */}
@@ -596,7 +654,7 @@ function DeleteOrgModal({ org, onClose, onSuccess }) {
     load();
   }, [org._id]);
 
-  const handleDelete = async () => {
+ const handleDelete = async () => {
     if (confirmation !== org.name) {
       setError(`Type "${org.name}" exactly to confirm`);
       return;
@@ -610,12 +668,10 @@ function DeleteOrgModal({ org, onClose, onSuccess }) {
         data: { confirmation, reason: reason.trim() }
       });
 
-      alert(
-        `✅ Organization deleted!\n\n` +
+      showSuccess(
+        `${org.name} deleted! ` +
         `${res.data.deletionStats.users} users, ` +
-        `${res.data.deletionStats.branches} branches, ` +
-        `${res.data.deletionStats.orders} orders removed.\n\n` +
-        (res.data.emailSent ? "Owner notified by email." : "")
+        `${res.data.deletionStats.branches} branches removed.`
       );
 
       onSuccess();
@@ -960,12 +1016,13 @@ function UsersTab() {
 
   useEffect(() => { loadUsers(); }, []);
 
-  const handleToggleUser = async (userId, current) => {
+const handleToggleUser = async (userId, current) => {
     try {
       await api.put(`/super-admin/users/${userId}`, { isActive: !current });
+      showSuccess(current ? "User deactivated" : "User activated");
       loadUsers();
     } catch {
-      alert("Failed to update user");
+      showError("Failed to update user");
     }
   };
 
@@ -1100,8 +1157,12 @@ function UsersTab() {
       {/* GROUPED USER LIST */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {groupArray.length === 0 ? (
-          <div className="tab-empty">No users found</div>
-        ) : (
+  <EmptyState
+    icon="👥"
+    title="No users found"
+    description={search ? `No matches for "${search}"` : "Users will appear here as people sign up"}
+  />
+) : (
           groupArray.map(group => {
             const expanded = expandedOrgs[group.orgId];
             const owners = group.users.filter(u => u.role === "owner");

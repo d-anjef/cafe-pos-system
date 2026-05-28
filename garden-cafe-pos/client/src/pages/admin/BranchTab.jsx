@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../../services/api";
 import { Plus, Edit, Trash2, Power, QrCode, X, Printer } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
+import { showSuccess, showError, showInfo, confirmAction } from "../../utils/toast";
 
 export default function BranchTab() {
   const [branches, setBranches] = useState([]);
@@ -18,7 +19,7 @@ export default function BranchTab() {
       const res = await api.get("/branches");
       setBranches(res.data.branches || []);
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to load branches");
+      showError(err.response?.data?.message || "Failed to load branches");
     } finally {
       setLoading(false);
     }
@@ -34,6 +35,7 @@ export default function BranchTab() {
     try {
       await api.delete(`/branches/${b._id}`);
       loadBranches();
+      showSuccess(`Branch "${b.name}" deleted`);
     } catch (err) {
       alert(err.response?.data?.message || "Cannot delete branch");
     }
@@ -42,9 +44,10 @@ export default function BranchTab() {
   const handleToggleActive = async (b) => {
     try {
       await api.put(`/branches/${b._id}`, { isActive: !b.isActive });
+      showSuccess(b.isActive ? `${b.name} deactivated` : `${b.name} activated`);
       loadBranches();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to update branch");
+      showError(err.response?.data?.message || "Failed to update branch");
     }
   };
 
@@ -342,6 +345,7 @@ function QRModal({ branch, onClose }) {
 
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(qrUrl);
+    showSuccess("URL copied to clipboard!");
   };
 
   return (

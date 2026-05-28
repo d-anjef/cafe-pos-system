@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import { showSuccess, showError } from "../../utils/toast";
 
 const PLAN_COLORS = {
   free: "#888",
@@ -25,7 +26,7 @@ export default function BillingTab() {
       setBilling(billingRes.data);
       setPlans(plansRes.data.plans);
     } catch (err) {
-      console.error(err);
+      showError(err.response?.data?.message || "Failed to load billing information");
     } finally {
       setLoading(false);
     }
@@ -292,7 +293,7 @@ function UpgradeModal({ plans, currentPlan, preselected, onClose, onSuccess }) {
 
   const handleSubmit = async () => {
     if (!transactionRef.trim()) {
-      return alert("Please enter your transaction reference/proof");
+      return showError("Please enter your transaction reference/proof");
     }
 
     setSubmitting(true);
@@ -305,9 +306,10 @@ function UpgradeModal({ plans, currentPlan, preselected, onClose, onSuccess }) {
         notes
       });
       setSuccess(true);
+      showSuccess("Upgrade request submitted! We'll verify within 24 hours.");
       setTimeout(() => onSuccess(), 2000);
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to submit request");
+      showError(err.response?.data?.message || "Failed to submit request");
     } finally {
       setSubmitting(false);
     }

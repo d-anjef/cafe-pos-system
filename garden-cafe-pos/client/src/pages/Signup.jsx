@@ -16,6 +16,7 @@ export default function Signup() {
   const [loading, setLoading]             = useState(false);
   const [error, setError]                 = useState("");
   const [generatedStaff, setGeneratedStaff] = useState([]);
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   const [formData, setFormData] = useState({
     organizationName: "",
@@ -38,13 +39,14 @@ export default function Signup() {
   };
 
   // ── Step 2 validation ─────────────────────────────────
-  const validateStep2 = () => {
-    if (!formData.name.trim()) return setError("Enter your name") || false;
-    if (!/\S+@\S+\.\S+/.test(formData.email)) return setError("Enter a valid email") || false;
-    if (formData.password.length < 6) return setError("Password must be at least 6 characters") || false;
-    if (formData.password !== formData.confirmPassword) return setError("Passwords don't match") || false;
-    return true;
-  };
+ const validateStep2 = () => {
+  if (!formData.name.trim()) return setError("Enter your name") || false;
+  if (!/\S+@\S+\.\S+/.test(formData.email)) return setError("Enter a valid email") || false;
+  if (formData.password.length < 6) return setError("Password must be at least 6 characters") || false;
+  if (formData.password !== formData.confirmPassword) return setError("Passwords don't match") || false;
+  if (!acceptTerms) return setError("Please accept the Terms of Service to continue") || false;  // ✅ NEW
+  return true;
+};
 
   const handleNext = () => {
     if (step === 1 && validateStep1()) setStep(2);
@@ -373,11 +375,55 @@ export default function Signup() {
                   </button>
                 </div>
 
-                <div className="nv-terms">
-                  By continuing, you agree to our{" "}
-                  <Link to="/terms" className="nv-link">Terms</Link> and{" "}
-                  <Link to="/privacy" className="nv-link">Privacy Policy</Link>
-                </div>
+                {/* TERMS CHECKBOX — ✅ NEW */}
+<div style={{
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: 10,
+  marginTop: 16,
+  padding: 12,
+  background: 'rgba(212, 175, 55, 0.05)',
+  border: `1px solid ${acceptTerms ? 'var(--nv-gold)' : 'var(--nv-border)'}`,
+  borderRadius: 10,
+  transition: 'border 0.2s'
+}}>
+  <input
+    type="checkbox"
+    id="acceptTerms"
+    checked={acceptTerms}
+    onChange={(e) => setAcceptTerms(e.target.checked)}
+    style={{
+      marginTop: 3,
+      width: 18,
+      height: 18,
+      cursor: 'pointer',
+      accentColor: 'var(--nv-gold)',
+      flexShrink: 0
+    }}
+  />
+  <label
+    htmlFor="acceptTerms"
+    style={{
+      fontSize: 13,
+      lineHeight: 1.5,
+      cursor: 'pointer',
+      color: 'var(--nv-text-soft)'
+    }}
+  >
+    I agree to the{' '}
+    <Link to="/terms" target="_blank" className="nv-link" style={{ fontWeight: 600 }}>
+      Terms of Service
+    </Link>
+    ,{' '}
+    <Link to="/privacy" target="_blank" className="nv-link" style={{ fontWeight: 600 }}>
+      Privacy Policy
+    </Link>
+    , and{' '}
+    <Link to="/refund-policy" target="_blank" className="nv-link" style={{ fontWeight: 600 }}>
+      Refund Policy
+    </Link>
+  </label>
+</div>
               </form>
             )}
 

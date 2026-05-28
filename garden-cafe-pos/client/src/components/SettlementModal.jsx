@@ -2,6 +2,7 @@ import { useState } from "react";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import "../styles/settlement.css";
+import { showSuccess, showError } from "../utils/toast";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -48,10 +49,11 @@ export default function SettlementModal({ order, onClose, onComplete }) {
     try {
       await api.put(`/orders/${order._id}/complete`, { paymentMethod });
       window.print();
+      showSuccess(`Payment complete via ${paymentMethod.toUpperCase()}`);
       onComplete();
       onClose();
     } catch (err) {
-      alert("Payment failed. Try again.");
+      showError(err.response?.data?.message || "Payment failed. Try again.");
     } finally {
       setProcessing(false);
     }

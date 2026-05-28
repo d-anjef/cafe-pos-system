@@ -1,0 +1,31 @@
+.skeleton-shimmer {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    rgba(212, 175, 55, 0.05) 0%,
+    rgba(212, 175, 55, 0.15) 50%,
+    rgba(212, 175, 55, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Dark mode adjustment */
+[data-theme="dark"] .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 200% 100%;
+}

@@ -143,12 +143,13 @@
 }
 
 .nv-mobile-menu {
-  display: none;
+  display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 16px 24px 24px;
   background: var(--nv-bg);
   border-bottom: 1px solid var(--nv-border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .nv-mobile-link {
@@ -1078,17 +1079,45 @@
 }
 
 /* ============================================================
-   RESPONSIVE
+   RESPONSIVE — TABLET (900px)
 ============================================================ */
 
 @media (max-width: 900px) {
 
-  .nv-nav-links { display: none; }
-  .nv-nav-login { display: none; }
-  .nv-nav-cta { display: none; }
-  .nv-mobile-toggle { display: inline-flex; }
-  .nv-mobile-menu { display: flex; }
+  /* NAVBAR — Force hide desktop elements (high specificity) */
+  .nv-nav .nv-nav-links,
+  .nv-nav .nv-nav-login,
+  .nv-nav .nv-nav-cta,
+  .nv-nav a.nv-nav-cta,
+  .nv-nav .nv-btn-gold.nv-nav-cta {
+    display: none !important;
+  }
 
+  .nv-nav .nv-mobile-toggle {
+    display: inline-flex !important;
+  }
+
+  .nv-nav-inner {
+    padding: 12px 16px !important;
+    gap: 10px !important;
+  }
+
+  .nv-nav-logo {
+    font-size: 16px;
+    letter-spacing: 1.5px;
+  }
+
+  .nv-nav-logo-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 15px;
+  }
+
+  .nv-nav-actions {
+    gap: 8px;
+  }
+
+  /* HERO PREVIEW MOCKUP */
   .nv-preview-body {
     grid-template-columns: 1fr;
   }
@@ -1105,6 +1134,7 @@
     display: none;
   }
 
+  /* SECTIONS */
   .nv-section {
     padding: 60px 0;
   }
@@ -1113,22 +1143,40 @@
     padding: 40px 24px;
   }
 
+  /* CONTACT */
   .nv-contact-grid {
     grid-template-columns: 1fr;
     gap: 24px;
   }
 
+  /* FOOTER */
   .nv-footer-grid {
     grid-template-columns: 1fr 1fr;
     gap: 32px;
   }
 
+  /* PRICING */
   .nv-price-highlighted {
     transform: none;
   }
+
+  /* PAGE HEADER on tablet */
+  .nv-page-header {
+    padding: 50px 0 20px;
+  }
+
+  .nv-page-title {
+    font-size: 32px;
+  }
 }
 
+/* ============================================================
+   RESPONSIVE — MOBILE (600px)
+============================================================ */
+
 @media (max-width: 600px) {
+
+  /* FOOTER */
   .nv-footer-grid {
     grid-template-columns: 1fr;
   }
@@ -1138,8 +1186,17 @@
     text-align: center;
   }
 
+  /* HERO */
   .nv-hero {
     padding: 40px 0 60px;
+  }
+
+  .nv-hero-title {
+    font-size: 36px;
+  }
+
+  .nv-hero-subtitle {
+    font-size: 15px;
   }
 
   .nv-hero-trust {
@@ -1147,4 +1204,55 @@
     gap: 8px;
     margin-bottom: 40px;
   }
+
+  /* SECTIONS */
+  .nv-section {
+    padding: 50px 0;
+  }
+
+  .nv-section-title {
+    font-size: 28px;
+  }
+
+  .nv-page-title {
+    font-size: 28px;
+  }
+
+  /* PRICING — single column on mobile */
+  .nv-pricing-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* CONTACT */
+  .nv-contact-form {
+    padding: 20px;
+  }
+
+  /* CTA */
+  .nv-cta-card {
+    padding: 32px 20px;
+  }
+}
+
+/* Mobile menu button styling */
+.nv-mobile-menu .nv-btn-gold {
+  width: 100%;
+  margin-top: 8px;
+  justify-content: center;
+}
+
+.nv-mobile-link {
+  display: block;
+  padding: 12px 14px;
+  color: var(--nv-text);
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.nv-mobile-link:hover {
+  background: var(--nv-surface-2);
+  color: var(--nv-gold);
 }

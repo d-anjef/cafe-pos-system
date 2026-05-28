@@ -1,8 +1,10 @@
+// ✅ MUST be the FIRST line — loads env vars before any other imports
+require("dotenv").config();
+
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
-const dotenv = require("dotenv");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
@@ -10,11 +12,12 @@ const cookieParser = require("cookie-parser");
 const Organization = require('./models/Organization');
 const Branch = require('./models/Branch');
 const Subscription = require('./models/Subscription');
+const { startTrialCron } = require('./cron/trialCron');
+const { enforceReadOnly } = require('./middleware/subscriptionMiddleware');
 
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorMiddleware");
 
-dotenv.config();
 connectDB();
 
 const app = express();
@@ -31,26 +34,23 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin
       if (!origin) return callback(null, true);
 
-      // Allow localhost + production
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
-      // Allow ALL Vercel preview deployments
       if (origin.includes("vercel.app")) {
         return callback(null, true);
       }
 
       console.log("❌ Blocked by CORS:", origin);
-
       return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
   })
 );
+
 /* ---------------- SOCKET.IO ---------------- */
 const io = new Server(server, {
   cors: {
@@ -69,25 +69,7 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-app.set("io", io); 
-/* ---------------- CORS CONFIG ---------------- */
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      console.log("❌ Blocked by CORS:", origin);
-
-      // DO NOT throw error (important for production)
-      return callback(null, false);
-    },
-    credentials: true,
-  })
-);
+app.set("io", io);
 
 /* ---------------- HANDLE PRE-FLIGHT REQUESTS ---------------- */
 app.use((req, res, next) => {
@@ -112,6 +94,9 @@ app.use(cookieParser());
 app.use(helmet());
 app.use(morgan("dev"));
 
+// ✅ Apply read-only enforcement to all protected routes
+app.use(enforceReadOnly);
+
 /* ---------------- ROUTES ---------------- */
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/tables", require("./routes/tableRoutes"));
@@ -126,7 +111,8 @@ app.use("/api/stripe", require("./routes/stripe"));
 app.use("/api/super-admin", require("./routes/superAdmin"));
 app.use("/api/billing", require("./routes/billing"));
 app.use("/api/staff", require("./routes/staff"));
-app.use("/api/public", require("./routes/publicRoutes"));  
+app.use("/api/public", require("./routes/publicRoutes"));
+app.use("/api/trial", require("./routes/trialRoutes"));
 
 /* ---------------- HEALTH CHECK ---------------- */
 app.get("/", (req, res) => {
@@ -140,7 +126,6 @@ app.use(errorHandler);
 io.on("connection", (socket) => {
   console.log("🔌 Client Connected:", socket.id);
 
-  // ✅ Join branch-specific room
   socket.on("join:branch", (branchId) => {
     if (branchId) {
       socket.join(`branch_${branchId}`);
@@ -148,7 +133,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // ✅ Leave branch room
   socket.on("leave:branch", (branchId) => {
     if (branchId) {
       socket.leave(`branch_${branchId}`);
@@ -164,6 +148,9 @@ io.on("connection", (socket) => {
 /* ---------------- START SERVER ---------------- */
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () =>
-  console.log(`🚀 Server running on port ${PORT}`)
-);
+server.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+
+  // ✅ Start trial cron job
+  startTrialCron();
+});

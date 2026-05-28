@@ -4,18 +4,17 @@ import socket, { joinBranchRoom } from "../services/socket";
 import { useAuth } from "../context/AuthContext";
 import { useBranch } from "../context/BranchContext";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "../hooks/useToast";
-import Toast from "../components/common/Toast";
+import { showSuccess, showError } from "../utils/toast";
 import MenuGrid from "../components/waiter/MenuGrid";
 import CartPanel from "../components/waiter/CartPanel";
 import SettlementModal from "../components/SettlementModal";
+
 import "../styles/waiter.css";
 
 export default function WaiterDashboard() {
   const { logout, user } = useAuth();
   const { activeBranch } = useBranch();
   const navigate = useNavigate();
-  const { toasts, showToast, removeToast } = useToast();
 
   const [tables, setTables] = useState([]);
   const [items, setItems] = useState([]);
@@ -107,7 +106,7 @@ export default function WaiterDashboard() {
       setActiveOrder(res.data);
       setShowSettlement(true);
     } catch {
-      showToast("No active order found", "error");
+      showError("No active order found");
     }
   };
 
@@ -230,7 +229,7 @@ export default function WaiterDashboard() {
           setCart={setCart}
           selectedTable={selectedTable}
           onViewBill={handleViewBill}
-          showToast={showToast}
+          showToast={(msg, type) => type === 'error' ? showError(msg) : showSuccess(msg)}
         />
 
       </div>
@@ -245,23 +244,11 @@ export default function WaiterDashboard() {
             setSelectedTable(null);
             setActiveOrder(null);
             setCart([]);
-            showToast("Payment completed successfully!", "success");
+            showSuccess("Payment completed successfully!");
             loadData();
           }}
         />
       )}
-
-      {/* TOAST NOTIFICATIONS */}
-      <div className="toast-container">
-        {toasts.map(t => (
-          <Toast
-            key={t.id}
-            message={t.message}
-            type={t.type}
-            onClose={() => removeToast(t.id)}
-          />
-        ))}
-      </div>
 
     </div>
   );

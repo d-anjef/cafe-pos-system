@@ -25,10 +25,12 @@ const server = http.createServer(app);
 
 /* ---------------- ALLOWED ORIGINS ---------------- */
 const allowedOrigins = [
-  "http://localhost:5173",      // Vite dev server
-  "http://localhost:4173",      // Vite preview default
-  "http://localhost:4174",      // Vite preview fallback
+  "http://localhost:5173",
+  "http://localhost:4173",
+  "http://localhost:4174",
   "https://cafe-pos-system-wheat.vercel.app",
+  "https://cafepos.dpdns.org",
+  "https://www.cafepos.dpdns.org",
 ];
 
 app.use(

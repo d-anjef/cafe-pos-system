@@ -106,6 +106,7 @@ app.use("/api/orders", require("./routes/orderRoutes"));
 app.use("/api/analytics", require("./routes/analyticsRoutes"));
 app.use("/api/layout", require("./routes/layoutRoutes"));
 app.use("/api/menu", require("./routes/menuRoutes"));
+app.use("/api/menu-ai", require("./routes/menuAiRoutes"));
 app.use("/api/organization", require("./routes/organization"));
 app.use("/api/branches", require("./routes/branches"));
 app.use("/api/local-payments", require("./routes/localPayments"));

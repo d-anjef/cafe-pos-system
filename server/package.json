@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.16.1",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
@@ -24,6 +25,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.6.1",
     "morgan": "^1.10.1",
+    "multer": "^2.2.0",
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.7",
     "qrcode": "^1.5.4",

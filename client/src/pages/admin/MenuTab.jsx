@@ -4,19 +4,21 @@ import { showSuccess, showError, confirmAction } from "../../utils/toast";
 import EmptyState from "../../components/EmptyState";
 import {
   Plus, Edit, Trash2, X, Star, Eye, EyeOff,
-  Tag, Layers, ChefHat, Search
+  Tag, Layers, ChefHat, Search, Sparkles
 } from "lucide-react";
+import MenuAiUpload from "../../components/MenuAiUpload";
 
 export default function MenuTab() {
   const [items, setItems]           = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading]       = useState(true);
-  const [activeView, setActiveView] = useState("items"); // items | categories
+  const [activeView, setActiveView] = useState("items"); 
 
-  const [showItemModal, setShowItemModal]     = useState(false);
-  const [showCatModal, setShowCatModal]       = useState(false);
-  const [editItem, setEditItem]               = useState(null);
-  const [editCategory, setEditCategory]       = useState(null);
+ const [showItemModal, setShowItemModal]     = useState(false);
+const [showCatModal, setShowCatModal]       = useState(false);
+const [showAiUpload, setShowAiUpload]       = useState(false);  
+const [editItem, setEditItem]               = useState(null);
+const [editCategory, setEditCategory]       = useState(null);
 
   const [search, setSearch]         = useState("");
   const [filterCat, setFilterCat]   = useState("all");
@@ -135,36 +137,58 @@ export default function MenuTab() {
       {activeView === "items" && (
         <>
           {/* CONTROLS */}
-          <div className="glass-card" style={{ padding: 14, marginBottom: 16, display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <div style={{ flex: 1, minWidth: 220, position: "relative" }}>
-              <Search size={14} style={searchIconStyle} />
-              <input
-                placeholder="Search menu items..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                style={{ ...inputStyle, paddingLeft: 36 }}
-              />
-            </div>
+<div className="glass-card" style={{ padding: 14, marginBottom: 16, display: "flex", gap: 12, flexWrap: "wrap" }}>
+  <div style={{ flex: 1, minWidth: 220, position: "relative" }}>
+    <Search size={14} style={searchIconStyle} />
+    <input
+      placeholder="Search menu items..."
+      value={search}
+      onChange={e => setSearch(e.target.value)}
+      style={{ ...inputStyle, paddingLeft: 36 }}
+    />
+  </div>
 
-            <select
-              value={filterCat}
-              onChange={e => setFilterCat(e.target.value)}
-              style={inputStyle}
-            >
-              <option value="all">All Categories</option>
-              {categories.map(c => (
-                <option key={c._id} value={c.name}>{c.icon} {c.name}</option>
-              ))}
-            </select>
+  <select
+    value={filterCat}
+    onChange={e => setFilterCat(e.target.value)}
+    style={inputStyle}
+  >
+    <option value="all">All Categories</option>
+    {categories.map(c => (
+      <option key={c._id} value={c.name}>{c.icon} {c.name}</option>
+    ))}
+  </select>
 
-            <button
-              className="gold-btn"
-              onClick={() => { setEditItem(null); setShowItemModal(true); }}
-              style={{ display: "flex", alignItems: "center", gap: 6 }}
-            >
-              <Plus size={14} /> Add Item
-            </button>
-          </div>
+  {/* ✨ NEW: AI Menu Upload */}
+  <button
+    onClick={() => setShowAiUpload(true)}
+    style={{
+      padding: "8px 16px",
+      borderRadius: 10,
+      border: "none",
+      background: "linear-gradient(135deg, #d4af37, #f0c445)",
+      color: "#000",
+      fontWeight: 700,
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      fontSize: 13,
+      boxShadow: "0 4px 12px rgba(212, 175, 55, 0.3)"
+    }}
+    title="Upload menu photo — AI extracts items automatically"
+  >
+    <Sparkles size={14} /> AI Upload
+  </button>
+
+  <button
+    className="gold-btn"
+    onClick={() => { setEditItem(null); setShowItemModal(true); }}
+    style={{ display: "flex", alignItems: "center", gap: 6 }}
+  >
+    <Plus size={14} /> Add Item
+  </button>
+</div>
 
           {/* TODAY'S SPECIALS SECTION */}
           {specialCount > 0 && (
@@ -329,6 +353,17 @@ export default function MenuTab() {
           }}
         />
       )}
+
+      {/* ✨ AI MENU UPLOAD MODAL */}
+{showAiUpload && (
+  <MenuAiUpload
+    onClose={() => setShowAiUpload(false)}
+    onSuccess={() => {
+      setShowAiUpload(false);
+      loadAll();
+    }}
+  />
+)}
     </div>
   );
 }
